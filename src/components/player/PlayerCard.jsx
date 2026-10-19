@@ -90,8 +90,8 @@ function PlayerCard() {
   }
 
   return (
-    <section className="player_card max-w-sm mx-auto border rounded-2xl px-4 relative">
-      <article className="flex flex-col justify-center items-center">
+    <section className="w-full flex justify-center items-center">
+      <article className="w-full max-w-sm mx-auto border rounded-2xl px-4 relative flex flex-col justify-center items-center">
         <div className="card flex flex-col justify-center items-center">
           <h2 className="text-xl my-4">Poeme islamique</h2>
           <img
