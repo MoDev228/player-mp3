@@ -1,5 +1,3 @@
-
-
 function ProgressBar({ currentTime, duration, onSeek }) {
   function formatTime(time) {
     if (!Number.isFinite(time)) return "0:00";
@@ -22,13 +20,9 @@ function ProgressBar({ currentTime, duration, onSeek }) {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className=" w-full flex justify-between items-center gap-3 my-4">
-      <span className="text-xs text-muted-foreground">
-        {formatTime(currentTime)}
-      </span>
-
+    <div className=" w-full flex flex-col justify-center items-center gap-3 my-4">
       <div
-        className="h-1 flex-1 cursor-pointer rounded-full bg-muted"
+        className="w-full h-1 cursor-pointer rounded-full bg-muted"
         onClick={handleProgressClick}
       >
         <div
@@ -36,10 +30,15 @@ function ProgressBar({ currentTime, duration, onSeek }) {
           style={{ width: `${progress}%` }}
         />
       </div>
+      <div className="w-full flex justify-between">
+        <span className="text-xs text-muted-foreground">
+          {formatTime(currentTime)}
+        </span>
 
-      <span className="text-xs text-muted-foreground">
-        {formatTime(duration)}
-      </span>
+        <span className="text-xs text-muted-foreground">
+          {formatTime(duration)}
+        </span>
+      </div>
     </div>
   );
 }
