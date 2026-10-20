@@ -45,6 +45,21 @@ export default defineConfig({
           },
         ],
       },
+
+      workbox: {
+        globPatterns: [
+          "**/*.{js,css,html,ico,png,svg,webmanifest}",
+          "audio/*.mp3",
+          "images/christien.jpg",
+          "images/markus-spiske-zJDqiEGUCHY-unsplash.jpg",
+          "images/voie.jpg",
+          "images/guillaume-de-germ.jpg",
+          "images/لا إله إلا الله1.jpeg",
+          "images/sunset-desert-with-muslim-mosque-foreground.jpg",
+        ],
+
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
+      },
     }),
   ],
 
