@@ -24,6 +24,16 @@ function ProgressBar({ currentTime, duration, onSeek }) {
       <div
         className="w-full h-1 cursor-pointer rounded-full bg-muted"
         onClick={handleProgressClick}
+        role="slider"
+        aria-label="Position dans le verset"
+        aria-valuemin={0}
+        aria-valuemax={duration || 0}
+        aria-valuenow={currentTime}
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowRight") onSeek(Math.min(duration, currentTime + 5));
+          if (event.key === "ArrowLeft") onSeek(Math.max(0, currentTime - 5));
+        }}
       >
         <div
           className="h-full rounded-full bg-primary"
@@ -36,7 +46,7 @@ function ProgressBar({ currentTime, duration, onSeek }) {
         </span>
 
         <span className="text-xs text-muted-foreground">
-          {formatTime(duration)}
+          -{formatTime(Math.max(0, duration - currentTime))}
         </span>
       </div>
     </div>
