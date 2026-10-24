@@ -16,8 +16,8 @@ export default defineConfig({
       registerType: "autoUpdate",
 
       manifest: {
-        name: "Lecteur du Coran",
-        short_name: "Coran",
+        name: "Quran - MP3",
+        short_name: "Quran MP3",
         description: "Écoutez la récitation du Noble Coran verset par verset.",
         lang: "fr",
         start_url: "/",
@@ -28,17 +28,17 @@ export default defineConfig({
 
         icons: [
           {
-            src: "/pwa-192x192.png",
+            src: "/images/192x192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/pwa-512x512.png",
+            src: "/images/512x512.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "/pwa-512x512.png",
+            src: "/images/512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",

@@ -32,7 +32,7 @@ function App() {
         type="button"
         onClick={toggleTheme}
         aria-label="Changer de thème"
-        className="fixed top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-card border shadow-sm transition-colors hover:bg-muted"
+        className="fixed bottom-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-colors hover:bg-muted"
       >
         {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
       </button>
