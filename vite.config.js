@@ -47,11 +47,40 @@ export default defineConfig({
       },
 
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: [
           "**/*.{js,css,html,ico,png,svg,webmanifest}",
         ],
 
         maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.alquran\.cloud\/v1\/surah(?:\/\d+\/fr\.leclerc)?$/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "quran-surah-data",
+              networkTimeoutSeconds: 3,
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: {
+                maxEntries: 115,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/cdn\.islamic\.network\/quran\/audio\/128\/fr\.leclerc\/\d+\.mp3$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-audio-fr",
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: {
+                maxEntries: 1600,
+                maxAgeSeconds: 60 * 60 * 24 * 180,
+              },
+            },
+          },
+        ],
       },
     }),
   ],

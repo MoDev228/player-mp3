@@ -5,6 +5,23 @@ import ProgressBar from "@/components/player/ProgressBar";
 import SurahList from "./SurahList";
 import { FiGithub } from "react-icons/fi";
 
+async function waitForServiceWorkerControl() {
+  if (!("serviceWorker" in navigator)) return false;
+
+  await navigator.serviceWorker.ready;
+  if (!navigator.serviceWorker.controller) {
+    await new Promise((resolve) => {
+      const timeout = window.setTimeout(resolve, 5000);
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.clearTimeout(timeout);
+        resolve();
+      }, { once: true });
+    });
+  }
+
+  return Boolean(navigator.serviceWorker.controller);
+}
+
 function PlayerCard() {
   const audioRef = useRef(null);
   const [surahs, setSurahs] = useState([]);
@@ -14,8 +31,10 @@ function PlayerCard() {
   const [loadedSurahNumber, setLoadedSurahNumber] = useState(null);
   const [loadError, setLoadError] = useState({ surahNumber: null, message: "" });
   const [audioError, setAudioError] = useState("");
+  const [audioCacheStatus, setAudioCacheStatus] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const hasStartedRef = useRef(false);
+  const audioCacheJobRef = useRef(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -42,6 +61,78 @@ function PlayerCard() {
       .catch(() => { if (!cancelled) setLoadError({ surahNumber, message: "Impossible de charger cette sourate. Vérifie ta connexion et réessaie." }); });
     return () => { cancelled = true; };
   }, [surahNumber]);
+
+  useEffect(() => {
+    if (loadedSurahNumber !== surahNumber || !ayahs.length) return;
+
+    const audioUrls = [...new Set(ayahs.map((ayah) => ayah.audio).filter(Boolean))];
+    const jobId = ++audioCacheJobRef.current;
+
+    if (!navigator.onLine) {
+      setAudioCacheStatus({ surahNumber, state: "offline", completed: 0, total: audioUrls.length });
+      return;
+    }
+
+    if (!audioUrls.length) {
+      setAudioCacheStatus({ surahNumber, state: "unavailable", completed: 0, total: 0 });
+      return;
+    }
+
+    let cancelled = false;
+    let nextIndex = 0;
+    let completed = 0;
+    let failed = 0;
+    const controller = new AbortController();
+    setAudioCacheStatus({ surahNumber, state: "downloading", completed: 0, total: audioUrls.length });
+
+    async function cacheAudio() {
+      try {
+        const hasServiceWorker = await waitForServiceWorkerControl();
+        if (!hasServiceWorker) throw new Error("Le cache hors connexion n’est pas disponible.");
+
+        const audioCache = await caches.open("quran-audio-fr");
+        async function downloadNext() {
+          while (!cancelled && nextIndex < audioUrls.length) {
+            const url = audioUrls[nextIndex++];
+
+            try {
+              if (!(await audioCache.match(url))) {
+                await fetch(url, { mode: "no-cors", signal: controller.signal });
+              }
+              if (!(await audioCache.match(url))) failed += 1;
+            } catch {
+              failed += 1;
+            }
+
+            completed += 1;
+            if (!cancelled && audioCacheJobRef.current === jobId) {
+              setAudioCacheStatus({ surahNumber, state: "downloading", completed, total: audioUrls.length });
+            }
+          }
+        }
+
+        await Promise.all(Array.from({ length: Math.min(4, audioUrls.length) }, downloadNext));
+      } catch {
+        failed = audioUrls.length;
+      }
+
+      if (!cancelled && audioCacheJobRef.current === jobId) {
+        setAudioCacheStatus({
+          surahNumber,
+          state: failed === 0 ? "ready" : failed === audioUrls.length ? "unavailable" : "partial",
+          completed: audioUrls.length - failed,
+          total: audioUrls.length,
+        });
+      }
+    }
+
+    cacheAudio();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [ayahs, loadedSurahNumber, surahNumber]);
 
   const moveAyah = useCallback((direction) => {
     if (!ayahs.length) return;
@@ -150,6 +241,16 @@ function PlayerCard() {
                   <p className="mt-5 text-xs font-medium tracking-wide text-muted-foreground">Verset {currentAyah.numberInSurah} <span aria-hidden="true">·</span> {ayahs.length} versets</p>
                 </div> : null}
           </div>
+
+          {audioCacheStatus?.surahNumber === surahNumber && (
+            <p className="mt-3 text-center text-xs text-muted-foreground" aria-live="polite">
+              {audioCacheStatus.state === "downloading" && `Préparation hors connexion… ${audioCacheStatus.completed}/${audioCacheStatus.total}`}
+              {audioCacheStatus.state === "ready" && "Sourate disponible hors connexion"}
+              {audioCacheStatus.state === "partial" && `Mise en cache partielle : ${audioCacheStatus.completed}/${audioCacheStatus.total} audios`}
+              {audioCacheStatus.state === "offline" && "Hors connexion : les audios déjà mis en cache restent disponibles"}
+              {audioCacheStatus.state === "unavailable" && "Audio indisponible pour cette sourate"}
+            </p>
+          )}
 
           {audioError && <p role="alert" className="mt-3 text-center text-sm text-destructive">{audioError}</p>}
           <audio ref={audioRef} src={currentAyah?.audio} preload="metadata"
