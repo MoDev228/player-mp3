@@ -23,18 +23,27 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
   const [loadedAudioSource, setLoadedAudioSource] = useState(null);
   const resumePositionRef = useRef(resumePosition);
 
-  const handlePlayPause = useCallback(async () => {
+  const startPlayback = useCallback(async (forceReload = false) => {
     const audio = audioRef.current;
     if (!audio || !currentAyah?.audio) return;
-    if (audio.paused) {
-      hasStartedRef.current = true;
-      try {
-        if (audio.error || audio.readyState === 0) audio.load();
-        await audio.play();
-      }
-      catch (error) { setAudioError(getPlaybackErrorMessage(audio, error)); }
-    } else audio.pause();
+    hasStartedRef.current = true;
+    setAudioError("");
+    try {
+      if (forceReload || audio.error) audio.load();
+      await audio.play();
+    } catch (error) {
+      setAudioError(getPlaybackErrorMessage(audio, error));
+    }
   }, [currentAyah?.audio]);
+
+  const handlePlayPause = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentAyah?.audio) return;
+    if (audio.paused) startPlayback();
+    else audio.pause();
+  }, [currentAyah?.audio, startPlayback]);
+
+  const retryPlayback = useCallback(() => startPlayback(true), [startPlayback]);
 
   const handleSeek = useCallback((time) => {
     const audio = audioRef.current;
@@ -53,8 +62,8 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     setDuration(0);
     setLoadedAudioSource(null);
     setAudioError("");
-    if (hasStartedRef.current) audio.play().catch(() => setAudioError(PLAY_ERROR_MESSAGE));
-  }, [currentAyah?.audio, resumePosition]);
+    if (hasStartedRef.current) startPlayback();
+  }, [currentAyah?.audio, resumePosition, startPlayback]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
@@ -116,6 +125,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     isMuted,
     setIsMuted,
     handlePlayPause,
+    retryPlayback,
     handleSeek,
   };
 }

@@ -54,7 +54,7 @@ function PlayerCard() {
     ? savedPlayback.currentTime
     : 0;
   const player = useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahs.length, surahNumber, repeatMode, isShuffle, resumePosition);
-  const { audioProps, audioError, isPlaying, currentTime, duration, volume, setVolume, isMuted, setIsMuted, handlePlayPause, handleSeek, isAudioReady } = player;
+  const { audioProps, audioError, isPlaying, currentTime, duration, volume, setVolume, isMuted, setIsMuted, handlePlayPause, retryPlayback, handleSeek, isAudioReady } = player;
   usePlayerKeyboardShortcuts({ handlePlayPause, moveAyah, setVolume, setIsMuted });
 
   useEffect(() => {
@@ -85,7 +85,7 @@ function PlayerCard() {
           {audioError && (
             <div role="alert" className="mt-3 flex flex-col items-center gap-2 text-center">
               <p className="text-sm text-destructive">{audioError}</p>
-              <button type="button" onClick={handlePlayPause} className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+              <button type="button" onClick={retryPlayback} className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
                 Réessayer la lecture
               </button>
             </div>
