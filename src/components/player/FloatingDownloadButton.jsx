@@ -1,7 +1,23 @@
+import { useEffect, useState } from "react";
 import { Check, Download, LoaderCircle, RefreshCw, WifiOff } from "lucide-react";
 
 function FloatingDownloadButton({ status, surahNumber, isOnline, onDownload }) {
   if (status?.surahNumber !== surahNumber || (status.state === "unavailable" && status.total === 0)) return null;
+
+  return <VisibleFloatingDownloadButton status={status} surahNumber={surahNumber} isOnline={isOnline} onDownload={onDownload} />;
+}
+
+function VisibleFloatingDownloadButton({ status, surahNumber, isOnline, onDownload }) {
+  const [dismissedSurahNumber, setDismissedSurahNumber] = useState(null);
+  const isDismissed = status.state === "ready" && dismissedSurahNumber === surahNumber;
+
+  useEffect(() => {
+    if (status.state !== "ready" || isDismissed) return;
+    const timeout = window.setTimeout(() => setDismissedSurahNumber(surahNumber), 320);
+    return () => window.clearTimeout(timeout);
+  }, [isDismissed, status.state, surahNumber]);
+
+  if (isDismissed) return null;
 
   const isBusy = status.state === "checking" || status.state === "downloading";
   const isReady = status.state === "ready";
@@ -24,7 +40,7 @@ function FloatingDownloadButton({ status, surahNumber, isOnline, onDownload }) {
     : label;
 
   return (
-    <div className="pointer-events-none fixed bottom-16 right-4 z-40">
+    <div className={`pointer-events-none fixed bottom-16 right-4 z-40 ${status.state === "ready" ? "animate-download-dismiss" : ""}`} aria-hidden={status.state === "ready"}>
       <button
         type="button"
         onClick={onDownload}

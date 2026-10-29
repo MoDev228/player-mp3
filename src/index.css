@@ -1,6 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
+@keyframes download-button-dismiss {
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.94);
+  }
+}
+
+.animate-download-dismiss {
+  animation: download-button-dismiss 320ms ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-download-dismiss {
+    animation-duration: 1ms;
+  }
+}
+
 @font-face {
   font-family: "UthmanicHafs";
   src: url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2") format("woff2");
