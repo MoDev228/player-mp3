@@ -22,7 +22,7 @@ function PlayerCard() {
   const [showSurahList, setShowSurahList] = useState(false);
   const library = useQuranLibrary(surahNumber, ayahIndex);
   const { surahs, ayahs, loadedSurahNumber, currentAyah, isLoading, error, surahsLoading, surahsError, retrySurahs, retrySurah } = library;
-  const audioCache = useAudioCache(ayahs, loadedSurahNumber, surahNumber);
+  const audioCache = useAudioCache(ayahs, loadedSurahNumber, surahNumber, isLoading);
   const { status: audioCacheStatus, downloadSurah, isOnline } = audioCache;
 
   const moveAyah = useCallback((direction) => {

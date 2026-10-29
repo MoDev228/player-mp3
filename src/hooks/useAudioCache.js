@@ -22,7 +22,7 @@ function getAudioUrls(ayahs) {
   return [...new Set(ayahs.map((ayah) => ayah.audio).filter(Boolean))];
 }
 
-export function useAudioCache(ayahs, loadedSurahNumber, surahNumber) {
+export function useAudioCache(ayahs, loadedSurahNumber, surahNumber, isSurahLoading = false) {
   const [status, setStatus] = useState(null);
   const isOnline = useOnlineStatus();
   const audioUrls = useMemo(() => getAudioUrls(ayahs), [ayahs]);
@@ -108,7 +108,9 @@ export function useAudioCache(ayahs, loadedSurahNumber, surahNumber) {
   }, [audioUrls, isOnline, loadedSurahNumber, surahNumber]);
 
   const currentStatus = status?.surahNumber === surahNumber ? status : null;
-  const visibleStatus = loadedSurahNumber === surahNumber && !audioUrls.length
+  const visibleStatus = loadedSurahNumber !== surahNumber && isSurahLoading
+    ? { surahNumber, state: "preparing", completed: 0, total: 0 }
+    : loadedSurahNumber === surahNumber && !audioUrls.length
     ? { surahNumber, state: "unavailable", completed: 0, total: 0 }
     : currentStatus
       ? currentStatus.state === "idle" && !isOnline

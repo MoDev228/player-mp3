@@ -19,7 +19,7 @@ function VisibleFloatingDownloadButton({ status, surahNumber, isOnline, onDownlo
 
   if (isDismissed) return null;
 
-  const isBusy = status.state === "checking" || status.state === "downloading";
+  const isBusy = status.state === "preparing" || status.state === "checking" || status.state === "downloading";
   const isReady = status.state === "ready";
   const isDisabled = isBusy || isReady || !isOnline;
   const progress = status.state === "downloading" && status.total > 0
@@ -28,6 +28,7 @@ function VisibleFloatingDownloadButton({ status, surahNumber, isOnline, onDownlo
 
   let label = "Télécharger hors connexion";
   let Icon = Download;
+  if (status.state === "preparing") { label = "Préparation de la sourate…"; Icon = LoaderCircle; }
   if (status.state === "checking") { label = "Vérification du cache"; Icon = LoaderCircle; }
   if (status.state === "downloading") { label = `Téléchargement ${progress}%`; Icon = LoaderCircle; }
   if (status.state === "ready") { label = "Disponible hors connexion"; Icon = Check; }

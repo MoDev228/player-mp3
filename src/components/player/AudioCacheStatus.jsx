@@ -2,6 +2,7 @@ function AudioCacheStatus({ status, surahNumber }) {
   if (status?.surahNumber !== surahNumber) return null;
 
   let message = "";
+  if (status.state === "preparing") message = "Chargement de la sourate…";
   if (status.state === "checking") message = "Vérification du cache hors connexion…";
   if (status.state === "idle") message = "Cette sourate n’est pas encore téléchargée.";
   if (status.state === "offline") message = "Cette sourate n’est pas disponible hors connexion.";
