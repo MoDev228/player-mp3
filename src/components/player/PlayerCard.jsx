@@ -7,6 +7,7 @@ import { usePlayerKeyboardShortcuts } from "@/hooks/usePlayerKeyboardShortcuts";
 import { readSavedPlayback, savePlayback } from "@/lib/playbackStorage";
 import AudioControls from "./AudioControls";
 import AudioCacheStatus from "./AudioCacheStatus";
+import FloatingDownloadButton from "./FloatingDownloadButton";
 import AyahDisplay from "./AyahDisplay";
 import PlayerHeader from "./PlayerHeader";
 import ProgressBar from "./ProgressBar";
@@ -21,7 +22,8 @@ function PlayerCard() {
   const [showSurahList, setShowSurahList] = useState(false);
   const library = useQuranLibrary(surahNumber, ayahIndex);
   const { surahs, ayahs, loadedSurahNumber, currentAyah, isLoading, error, surahsLoading, surahsError, retrySurahs } = library;
-  const audioCacheStatus = useAudioCache(ayahs, loadedSurahNumber, surahNumber);
+  const audioCache = useAudioCache(ayahs, loadedSurahNumber, surahNumber);
+  const { status: audioCacheStatus, downloadSurah, isOnline } = audioCache;
 
   const moveAyah = useCallback((direction) => {
     if (!ayahs.length) return;
@@ -102,6 +104,7 @@ function PlayerCard() {
 
         {showSurahList && <SurahList surahs={surahs} currentSurahNumber={surahNumber} onSelectSurah={selectSurah} onClose={() => setShowSurahList(false)} isLoading={surahsLoading} error={surahsError} onRetry={retrySurahs} />}
       </article>
+      <FloatingDownloadButton status={audioCacheStatus} surahNumber={surahNumber} isOnline={isOnline} onDownload={downloadSurah} />
     </section>
   );
 }

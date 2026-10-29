@@ -14,11 +14,11 @@ Quran - MP3 est un lecteur du Coran utilisable sur ordinateur et sur mobile. Il 
 - Retrouver la dernière sourate, le verset et la position de lecture sur cet appareil.
 - Choisir un thème clair ou sombre ; le choix est mémorisé sur l’appareil.
 - Installer l’application depuis un navigateur compatible.
-- Préparer automatiquement les audios d’une sourate pour une écoute hors connexion, lorsqu’elle est ouverte avec une connexion Internet.
+- Télécharger manuellement les audios d’une sourate pour une écoute hors connexion.
 
 ## Utilisation hors connexion
 
-À l’ouverture d’une sourate en ligne, l’application charge ses données puis met en cache les audios de ses versets. Un indicateur affiche la progression et signale quand la sourate est prête hors connexion. Les données de sourate consultées sont également mises en cache.
+Les données des sourates consultées sont mises en cache automatiquement. Pour préparer les audios, ouvre une sourate avec Internet puis choisis « Télécharger pour hors connexion ». Un indicateur affiche la progression et signale quand la sourate est prête. Les audios déjà présents dans le cache ne sont pas téléchargés une seconde fois.
 
 Le cache est conservé par le navigateur sur l’appareil. Il peut être supprimé par les réglages du navigateur ou si celui-ci libère de l’espace. Ouvre chaque sourate avec Internet avant de compter l’écouter hors connexion.
 

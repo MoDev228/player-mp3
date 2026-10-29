@@ -54,7 +54,7 @@ function ProgressBar({ currentTime, duration, onSeek }) {
         onKeyDown={handleKeyDown}
       >
         <div
-          className="h-full rounded-full bg-primary"
+          className="h-full rounded-full bg-primary transition-[width] duration-200 ease-linear motion-reduce:transition-none"
           style={{ width: `${progress}%` }}
         />
       </div>

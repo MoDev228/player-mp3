@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 async function waitForServiceWorkerControl() {
@@ -18,86 +18,105 @@ async function waitForServiceWorkerControl() {
   return Boolean(navigator.serviceWorker.controller);
 }
 
+function getAudioUrls(ayahs) {
+  return [...new Set(ayahs.map((ayah) => ayah.audio).filter(Boolean))];
+}
+
 export function useAudioCache(ayahs, loadedSurahNumber, surahNumber) {
   const [status, setStatus] = useState(null);
-  const jobRef = useRef(0);
   const isOnline = useOnlineStatus();
+  const audioUrls = useMemo(() => getAudioUrls(ayahs), [ayahs]);
 
   useEffect(() => {
     if (loadedSurahNumber !== surahNumber || !ayahs.length) return;
 
-    const audioUrls = [...new Set(ayahs.map((ayah) => ayah.audio).filter(Boolean))];
-    const jobId = ++jobRef.current;
-
-    if (!isOnline) {
-      return;
-    }
-
-    if (!audioUrls.length) {
-      return;
-    }
-
     let cancelled = false;
-    let nextIndex = 0;
-    let completed = 0;
-    let failed = 0;
-    const controller = new AbortController();
-    async function cacheAudio() {
+    async function inspectCache() {
       try {
-        const hasServiceWorker = await waitForServiceWorkerControl();
-        if (!hasServiceWorker) throw new Error("Le cache hors connexion n’est pas disponible.");
+        const cache = await caches.open("quran-audio-fr");
+        const cachedCount = (await Promise.all(audioUrls.map((url) => cache.match(url)))).filter(Boolean).length;
+        if (cancelled) return;
 
-        const audioCache = await caches.open("quran-audio-fr");
-        if (!cancelled && jobRef.current === jobId) {
-          setStatus({ surahNumber, state: "downloading", completed: 0, total: audioUrls.length });
-        }
-        async function downloadNext() {
-          while (!cancelled && nextIndex < audioUrls.length) {
-            const url = audioUrls[nextIndex++];
-            try {
-              if (!(await audioCache.match(url))) {
-                await fetch(url, { mode: "no-cors", signal: controller.signal });
-              }
-              if (!(await audioCache.match(url))) failed += 1;
-            } catch {
-              failed += 1;
-            }
-
-            completed += 1;
-            if (!cancelled && jobRef.current === jobId) {
-              setStatus({ surahNumber, state: "downloading", completed, total: audioUrls.length });
-            }
-          }
-        }
-
-        await Promise.all(Array.from({ length: Math.min(4, audioUrls.length) }, downloadNext));
+        const state = cachedCount === audioUrls.length
+          ? "ready"
+            : cachedCount > 0 ? "partial" : "idle";
+        setStatus({ surahNumber, state, completed: cachedCount, total: audioUrls.length });
       } catch {
-        failed = audioUrls.length;
-      }
-
-      if (!cancelled && jobRef.current === jobId) {
-        setStatus({
-          surahNumber,
-          state: failed === 0 ? "ready" : failed === audioUrls.length ? "unavailable" : "partial",
-          completed: audioUrls.length - failed,
-          total: audioUrls.length,
-        });
+        if (!cancelled) setStatus({ surahNumber, state: "unavailable", completed: 0, total: audioUrls.length });
       }
     }
 
-    cacheAudio();
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [ayahs, isOnline, loadedSurahNumber, surahNumber]);
+    if (!audioUrls.length) return;
 
-  if (loadedSurahNumber === surahNumber && ayahs.length && !isOnline) {
-    return { surahNumber, state: "offline", completed: 0, total: ayahs.filter((ayah) => ayah.audio).length };
-  }
-  if (loadedSurahNumber === surahNumber && ayahs.length && !ayahs.some((ayah) => ayah.audio)) {
-    return { surahNumber, state: "unavailable", completed: 0, total: 0 };
-  }
+    inspectCache();
+    return () => { cancelled = true; };
+  }, [audioUrls, ayahs.length, loadedSurahNumber, surahNumber]);
 
-  return status;
+  const downloadSurah = useCallback(async () => {
+    if (!isOnline || loadedSurahNumber !== surahNumber || !audioUrls.length) return;
+
+    let downloaded = 0;
+    let processed = 0;
+    let failed = 0;
+    let nextIndex = 0;
+    setStatus({ surahNumber, state: "downloading", completed: 0, processed: 0, total: audioUrls.length });
+
+    try {
+      const hasServiceWorker = await waitForServiceWorkerControl();
+      if (!hasServiceWorker) throw new Error("Le cache hors connexion n’est pas disponible.");
+
+      const cache = await caches.open("quran-audio-fr");
+      const alreadyCached = await Promise.all(audioUrls.map((url) => cache.match(url)));
+      downloaded = alreadyCached.filter(Boolean).length;
+      processed = downloaded;
+      setStatus({ surahNumber, state: "downloading", completed: downloaded, processed, total: audioUrls.length });
+
+      async function downloadNext() {
+        while (nextIndex < audioUrls.length) {
+          const index = nextIndex++;
+          const url = audioUrls[index];
+          if (alreadyCached[index]) continue;
+
+          try {
+            await fetch(url, { mode: "no-cors" });
+            if (await cache.match(url)) downloaded += 1;
+            else failed += 1;
+          } catch {
+            failed += 1;
+          }
+
+          processed += 1;
+          setStatus({ surahNumber, state: "downloading", completed: downloaded, processed, total: audioUrls.length });
+        }
+      }
+
+      await Promise.all(Array.from({ length: Math.min(4, audioUrls.length) }, downloadNext));
+      setStatus({
+        surahNumber,
+        state: failed === 0 ? "ready" : downloaded > 0 ? "partial" : "unavailable",
+        completed: downloaded,
+        total: audioUrls.length,
+      });
+    } catch {
+      setStatus({
+        surahNumber,
+        state: downloaded > 0 ? "partial" : "unavailable",
+        completed: downloaded,
+        total: audioUrls.length,
+      });
+    }
+  }, [audioUrls, isOnline, loadedSurahNumber, surahNumber]);
+
+  const currentStatus = status?.surahNumber === surahNumber ? status : null;
+  const visibleStatus = loadedSurahNumber === surahNumber && !audioUrls.length
+    ? { surahNumber, state: "unavailable", completed: 0, total: 0 }
+    : currentStatus
+      ? currentStatus.state === "idle" && !isOnline
+        ? { ...currentStatus, state: "offline" }
+        : currentStatus
+      : loadedSurahNumber === surahNumber && audioUrls.length
+        ? { surahNumber, state: "checking", completed: 0, total: audioUrls.length }
+        : null;
+
+  return { status: visibleStatus, downloadSurah, isOnline };
 }
