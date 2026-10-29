@@ -11,6 +11,7 @@ Quran - MP3 est un lecteur du Coran utilisable sur ordinateur et sur mobile. Il 
 - Parcourir les 114 sourates et choisir un verset avec les commandes du lecteur.
 - Lire, mettre en pause, avancer ou reculer, régler le volume et déplacer la lecture.
 - Activer la lecture aléatoire et la répétition d’un verset ou de la sourate.
+- Retrouver la dernière sourate, le verset et la position de lecture sur cet appareil.
 - Choisir un thème clair ou sombre ; le choix est mémorisé sur l’appareil.
 - Installer l’application depuis un navigateur compatible.
 - Préparer automatiquement les audios d’une sourate pour une écoute hors connexion, lorsqu’elle est ouverte avec une connexion Internet.

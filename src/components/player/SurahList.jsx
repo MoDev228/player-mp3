@@ -1,15 +1,13 @@
 import { X } from "lucide-react";
 
-function SurahList({ surahs, currentSurahNumber, onSelectSurah, onClose }) {
+function SurahList({ surahs, currentSurahNumber, onSelectSurah, onClose, isLoading, error, onRetry }) {
   return (
     <div className="absolute top-0 right-0 z-10 mb-3 h-[70%] w-full overflow-x-hidden rounded-xl border bg-background shadow-lg">
       <div className="sticky top-0 left-0 right-0 w-full bg-background">
         <div className="flex items-center justify-between p-3">
           <div>
             <h3 className="font-semibold">Les sourates du Coran</h3>
-            <p className="text-sm text-muted-foreground">
-              {surahs.length} sourates disponibles
-            </p>
+          <p className="text-sm text-muted-foreground">{isLoading ? "Chargement…" : `${surahs.length} sourates disponibles`}</p>
           </div>
 
           <button
@@ -23,7 +21,15 @@ function SurahList({ surahs, currentSurahNumber, onSelectSurah, onClose }) {
         </div>
       </div>
 
-      <ul className="space-y-1 p-3">
+      {error ? (
+        <div className="p-4 text-center" role="alert">
+          <p className="text-sm text-destructive">{error}</p>
+          <button type="button" onClick={onRetry} className="mt-3 rounded-lg border px-3 py-2 text-sm hover:bg-muted">Réessayer</button>
+        </div>
+      ) : isLoading ? (
+        <p className="p-4 text-center text-sm text-muted-foreground" role="status">Chargement des sourates…</p>
+      ) : (
+        <ul className="space-y-1 p-3">
         {surahs.map((surah) => (
           <li key={surah.number}>
             <button
@@ -57,6 +63,7 @@ function SurahList({ surahs, currentSurahNumber, onSelectSurah, onClose }) {
           </li>
         ))}
       </ul>
+      )}
     </div>
   );
 }
