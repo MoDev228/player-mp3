@@ -19,7 +19,10 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     if (!audio || !currentAyah?.audio) return;
     if (audio.paused) {
       hasStartedRef.current = true;
-      try { await audio.play(); }
+      try {
+        if (audio.error) audio.load();
+        await audio.play();
+      }
       catch { setAudioError(PLAY_ERROR_MESSAGE); }
     } else audio.pause();
   }, [currentAyah?.audio]);
@@ -74,7 +77,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
   const audioProps = {
     ref: audioRef,
     src: currentAyah?.audio,
-    preload: "metadata",
+    preload: "none",
     onPlay: () => { hasStartedRef.current = true; setIsPlaying(true); setAudioError(""); },
     onPause: () => {
       setIsPlaying(false);

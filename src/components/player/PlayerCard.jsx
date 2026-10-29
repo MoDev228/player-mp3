@@ -21,7 +21,7 @@ function PlayerCard() {
   const [repeatMode, setRepeatMode] = useState("off");
   const [showSurahList, setShowSurahList] = useState(false);
   const library = useQuranLibrary(surahNumber, ayahIndex);
-  const { surahs, ayahs, loadedSurahNumber, currentAyah, isLoading, error, surahsLoading, surahsError, retrySurahs } = library;
+  const { surahs, ayahs, loadedSurahNumber, currentAyah, isLoading, error, surahsLoading, surahsError, retrySurahs, retrySurah } = library;
   const audioCache = useAudioCache(ayahs, loadedSurahNumber, surahNumber);
   const { status: audioCacheStatus, downloadSurah, isOnline } = audioCache;
 
@@ -79,10 +79,17 @@ function PlayerCard() {
 
         <div className="px-4 pb-6 pt-8 sm:px-8">
           <PlayerHeader surah={surahs.find((surah) => surah.number === surahNumber)} />
-          <AyahDisplay isLoading={isLoading} error={error} ayah={currentAyah} ayahCount={ayahs.length} />
+          <AyahDisplay isLoading={isLoading} error={error} ayah={currentAyah} ayahCount={ayahs.length} onRetry={retrySurah} />
           <AudioCacheStatus status={audioCacheStatus} surahNumber={surahNumber} />
 
-          {audioError && <p role="alert" className="mt-3 text-center text-sm text-destructive">{audioError}</p>}
+          {audioError && (
+            <div role="alert" className="mt-3 flex flex-col items-center gap-2 text-center">
+              <p className="text-sm text-destructive">{audioError}</p>
+              <button type="button" onClick={handlePlayPause} className="rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+                Réessayer la lecture
+              </button>
+            </div>
+          )}
           <audio {...audioProps} />
           <ProgressBar currentTime={currentTime} duration={duration} onSeek={handleSeek} />
           <AudioControls

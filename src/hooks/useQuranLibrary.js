@@ -10,6 +10,7 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0) {
   const [ayahs, setAyahs] = useState([]);
   const [loadedSurahNumber, setLoadedSurahNumber] = useState(null);
   const [loadError, setLoadError] = useState({ surahNumber: null, message: "" });
+  const [surahRequest, setSurahRequest] = useState(0);
   const [surahsLoading, setSurahsLoading] = useState(true);
   const [surahsError, setSurahsError] = useState("");
   const [surahsRequest, setSurahsRequest] = useState(0);
@@ -42,11 +43,16 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0) {
         if (!cancelled) setLoadError({ surahNumber, message: LOAD_ERROR_MESSAGE });
       });
     return () => { cancelled = true; };
-  }, [isOnline, surahNumber]);
+  }, [isOnline, surahNumber, surahRequest]);
+
+  const retrySurah = useCallback(() => {
+    setLoadError({ surahNumber: null, message: "" });
+    setSurahRequest((request) => request + 1);
+  }, []);
 
   const isLoading = loadedSurahNumber !== surahNumber && loadError.surahNumber !== surahNumber;
   const error = loadError.surahNumber === surahNumber ? loadError.message : "";
   const currentAyah = loadedSurahNumber === surahNumber ? ayahs[ayahIndex] : undefined;
 
-  return { surahs, ayahs, loadedSurahNumber, isLoading, error, currentAyah, surahsLoading, surahsError, retrySurahs };
+  return { surahs, ayahs, loadedSurahNumber, isLoading, error, currentAyah, surahsLoading, surahsError, retrySurahs, retrySurah };
 }
