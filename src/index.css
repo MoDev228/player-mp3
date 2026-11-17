@@ -1,23 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
-@keyframes download-button-dismiss {
-  to {
-    opacity: 0;
-    transform: translateY(0.5rem) scale(0.94);
-  }
-}
-
-.animate-download-dismiss {
-  animation: download-button-dismiss 320ms ease-in forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-download-dismiss {
-    animation-duration: 1ms;
-  }
-}
-
 @font-face {
   font-family: "UthmanicHafs";
   src: url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2") format("woff2");
@@ -27,117 +10,122 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.9555 0.0555 96.1549);
-  --foreground: oklch(0.3441 0.0066 48.5229);
-  --card: oklch(0.9655 0.0394 100.8622);
-  --card-foreground: oklch(0.3441 0.0066 48.5229);
-  --popover: oklch(0.9655 0.0394 100.8622);
-  --popover-foreground: oklch(0.3441 0.0066 48.5229);
-  --primary: oklch(0.5126 0.1616 39.2968);
-  --primary-foreground: oklch(0.9555 0.0555 96.1549);
-  --secondary: oklch(0.6176 0.1277 70.6739);
-  --secondary-foreground: oklch(0.9555 0.0555 96.1549);
-  --muted: oklch(0.8941 0.0566 89.2405);
-  --muted-foreground: oklch(0.5505 0.0234 62.5672);
-  --accent: oklch(0.8941 0.0566 89.2405);
-  --accent-foreground: oklch(0.3441 0.0066 48.5229);
-  --destructive: oklch(0.4374 0.1789 28.2597);
-  --destructive-foreground: oklch(0.9555 0.0555 96.1549);
-  --border: oklch(0.8255 0.0507 85.1158);
-  --input: oklch(0.8255 0.0507 85.1158);
-  --ring: oklch(0.5126 0.1616 39.2968);
-  --chart-1: oklch(0.4374 0.1789 28.2597);
-  --chart-2: oklch(0.5463 0.1124 106.4643);
-  --chart-3: oklch(0.6176 0.1277 70.6739);
-  --chart-4: oklch(0.4706 0.0816 215.8061);
-  --chart-5: oklch(0.4893 0.1242 344.2764);
-  --sidebar: oklch(0.9220 0.0553 92.5258);
-  --sidebar-foreground: oklch(0.3441 0.0066 48.5229);
-  --sidebar-primary: oklch(0.5126 0.1616 39.2968);
-  --sidebar-primary-foreground: oklch(0.9555 0.0555 96.1549);
-  --sidebar-accent: oklch(0.8941 0.0566 89.2405);
-  --sidebar-accent-foreground: oklch(0.3441 0.0066 48.5229);
-  --sidebar-border: oklch(0.8255 0.0507 85.1158);
-  --sidebar-ring: oklch(0.5126 0.1616 39.2968);
-  --font-sans: 'Outfit', sans-serif;
-  --font-serif: 'Georgia', serif;
-  --font-mono: 'Fira Code', monospace;
-  --radius: 0rem;
+  color-scheme: light;
+  accent-color: var(--primary);
+
+  --background: #ffffff;
+  --foreground: #2a231f;
+  --card: #ffffff;
+  --card-foreground: #2a231f;
+  --popover: #ffffff;
+  --popover-foreground: #2a231f;
+  --primary: #a24e3f;
+  --primary-foreground: #fffdfa;
+  --secondary: #f1e6d3;
+  --secondary-foreground: #3d322a;
+  --muted: #f7f3ee;
+  --muted-foreground: #6b5f57;
+  --accent: #5f7a6a;
+  --accent-foreground: #f7fbf8;
+  --destructive: #b3403a;
+  --destructive-foreground: #fffdfa;
+  --border: #e7ddd2;
+  --input: #e7ddd2;
+  --ring: #a24e3f;
+  --chart-1: #a24e3f;
+  --chart-2: #c59a62;
+  --chart-3: #5f7a6a;
+  --chart-4: #8a6d8f;
+  --chart-5: #7c6f5f;
+  --sidebar: #f7f3ee;
+  --sidebar-foreground: #2a231f;
+  --sidebar-primary: #a24e3f;
+  --sidebar-primary-foreground: #fffdfa;
+  --sidebar-accent: #5f7a6a;
+  --sidebar-accent-foreground: #f7fbf8;
+  --sidebar-border: #e7ddd2;
+  --sidebar-ring: #a24e3f;
+  --font-sans: DM Sans, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: Space Mono, monospace;
+  --radius: 0.75rem;
   --shadow-x: 0px;
-  --shadow-y: 4px;
-  --shadow-blur: 0px;
+  --shadow-y: 1px;
+  --shadow-blur: 3px;
   --shadow-spread: 0px;
-  --shadow-opacity: 0.1;
-  --shadow-color: #3c3836;
-  --shadow-2xs: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.05);
-  --shadow-xs: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.05);
-  --shadow-sm: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.10), 0px 1px 2px -1px hsl(20 5.2632% 22.3529% / 0.10);
-  --shadow: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.10), 0px 1px 2px -1px hsl(20 5.2632% 22.3529% / 0.10);
-  --shadow-md: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.10), 0px 2px 4px -1px hsl(20 5.2632% 22.3529% / 0.10);
-  --shadow-lg: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.10), 0px 4px 6px -1px hsl(20 5.2632% 22.3529% / 0.10);
-  --shadow-xl: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.10), 0px 8px 10px -1px hsl(20 5.2632% 22.3529% / 0.10);
-  --shadow-2xl: 0px 0px 0px 0px hsl(20 5.2632% 22.3529% / 0.25);
-  --tracking-normal: -0.01em;
+  --shadow-opacity: 0.08;
+  --shadow-color: hsl(25 20% 20%);
+  --shadow-2xs: 0 1px 2px 0 hsl(25 20% 20% / 0.05);
+  --shadow-xs: 0 1px 3px 0 hsl(25 20% 20% / 0.08), 0 1px 2px -1px hsl(25 20% 20% / 0.08);
+  --shadow-sm: 0 1px 3px 0 hsl(25 20% 20% / 0.1), 0 1px 2px -1px hsl(25 20% 20% / 0.1);
+  --shadow: 0 2px 6px -1px hsl(25 20% 20% / 0.1), 0 1px 3px -1px hsl(25 20% 20% / 0.08);
+  --shadow-md: 0 6px 16px -4px hsl(25 20% 20% / 0.12), 0 2px 6px -2px hsl(25 20% 20% / 0.08);
+  --shadow-lg: 0 12px 32px -8px hsl(25 20% 20% / 0.18), 0 4px 10px -4px hsl(25 20% 20% / 0.1);
+  --shadow-xl: 0 24px 48px -12px hsl(25 20% 20% / 0.22), 0 8px 16px -8px hsl(25 20% 20% / 0.1);
+  --shadow-2xl: 0 32px 64px -16px hsl(25 20% 20% / 0.28);
+  --tracking-normal: 0em;
   --spacing: 0.25rem;
   --shadow-offset-x: 0px;
-  --shadow-offset-y: 0px;
-  --letter-spacing: -0.01em;
+  --shadow-offset-y: 1px;
+  --letter-spacing: 0em;
 }
 
 .dark {
-  --background: oklch(0.2768 0 0);
-  --foreground: oklch(0.9555 0.0555 96.1549);
-  --card: oklch(0.2408 0.0049 219.6723);
-  --card-foreground: oklch(0.9555 0.0555 96.1549);
-  --popover: oklch(0.2408 0.0049 219.6723);
-  --popover-foreground: oklch(0.9555 0.0555 96.1549);
-  --primary: oklch(0.7311 0.1820 51.6932);
-  --primary-foreground: oklch(0.2768 0 0);
-  --secondary: oklch(0.8325 0.1595 82.9866);
-  --secondary-foreground: oklch(0.2768 0 0);
-  --muted: oklch(0.3441 0.0066 48.5229);
-  --muted-foreground: oklch(0.6903 0.0346 76.3067);
-  --accent: oklch(0.4110 0.0115 51.8658);
-  --accent-foreground: oklch(0.9555 0.0555 96.1549);
-  --destructive: oklch(0.6597 0.2175 30.3917);
-  --destructive-foreground: oklch(0.2768 0 0);
-  --border: oklch(0.3441 0.0066 48.5229);
-  --input: oklch(0.3441 0.0066 48.5229);
-  --ring: oklch(0.7311 0.1820 51.6932);
-  --chart-1: oklch(0.6597 0.2175 30.3917);
-  --chart-2: oklch(0.7652 0.1581 110.8346);
-  --chart-3: oklch(0.8325 0.1595 82.9866);
-  --chart-4: oklch(0.6927 0.0420 169.7681);
-  --chart-5: oklch(0.7054 0.0976 2.1895);
-  --sidebar: oklch(0.2408 0.0049 219.6723);
-  --sidebar-foreground: oklch(0.8941 0.0566 89.2405);
-  --sidebar-primary: oklch(0.7311 0.1820 51.6932);
-  --sidebar-primary-foreground: oklch(0.2768 0 0);
-  --sidebar-accent: oklch(0.3441 0.0066 48.5229);
-  --sidebar-accent-foreground: oklch(0.9555 0.0555 96.1549);
-  --sidebar-border: oklch(0.3441 0.0066 48.5229);
-  --sidebar-ring: oklch(0.7311 0.1820 51.6932);
-  --font-sans: 'Outfit', sans-serif;
-  --font-serif: 'Georgia', serif;
-  --font-mono: 'Fira Code', monospace;
-  --radius: 0rem;
+  color-scheme: dark;
+
+  --background: #1a1714;
+  --foreground: #f2ece3;
+  --card: #24201c;
+  --card-foreground: #f2ece3;
+  --popover: #24201c;
+  --popover-foreground: #f2ece3;
+  --primary: #d9b26f;
+  --primary-foreground: #241c10;
+  --secondary: #36302a;
+  --secondary-foreground: #f2ece3;
+  --muted: #2b2621;
+  --muted-foreground: #b8aea1;
+  --accent: #8fae9b;
+  --accent-foreground: #16211b;
+  --destructive: #e0857a;
+  --destructive-foreground: #2a1512;
+  --border: #3a332c;
+  --input: #3a332c;
+  --ring: #d9b26f;
+  --chart-1: #d9b26f;
+  --chart-2: #8fae9b;
+  --chart-3: #c98d7f;
+  --chart-4: #9b8fb8;
+  --chart-5: #a9a08e;
+  --sidebar: #1a1714;
+  --sidebar-foreground: #f2ece3;
+  --sidebar-primary: #d9b26f;
+  --sidebar-primary-foreground: #241c10;
+  --sidebar-accent: #8fae9b;
+  --sidebar-accent-foreground: #16211b;
+  --sidebar-border: #3a332c;
+  --sidebar-ring: #d9b26f;
+  --font-sans: DM Sans, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: Space Mono, monospace;
+  --radius: 0.75rem;
   --shadow-x: 0px;
-  --shadow-y: 4px;
-  --shadow-blur: 0px;
+  --shadow-y: 1px;
+  --shadow-blur: 3px;
   --shadow-spread: 0px;
-  --shadow-opacity: 0.2;
-  --shadow-color: #000000;
-  --shadow-2xs: 0px 0px 0px 0px hsl(0 0% 0% / 0.10);
-  --shadow-xs: 0px 0px 0px 0px hsl(0 0% 0% / 0.10);
-  --shadow-sm: 0px 0px 0px 0px hsl(0 0% 0% / 0.20), 0px 1px 2px -1px hsl(0 0% 0% / 0.20);
-  --shadow: 0px 0px 0px 0px hsl(0 0% 0% / 0.20), 0px 1px 2px -1px hsl(0 0% 0% / 0.20);
-  --shadow-md: 0px 0px 0px 0px hsl(0 0% 0% / 0.20), 0px 2px 4px -1px hsl(0 0% 0% / 0.20);
-  --shadow-lg: 0px 0px 0px 0px hsl(0 0% 0% / 0.20), 0px 4px 6px -1px hsl(0 0% 0% / 0.20);
-  --shadow-xl: 0px 0px 0px 0px hsl(0 0% 0% / 0.20), 0px 8px 10px -1px hsl(0 0% 0% / 0.20);
-  --shadow-2xl: 0px 0px 0px 0px hsl(0 0% 0% / 0.50);
+  --shadow-opacity: 0.35;
+  --shadow-color: hsl(0 0% 0%);
+  --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+  --shadow-xs: 0 1px 3px 0 hsl(0 0% 0% / 0.25), 0 1px 2px -1px hsl(0 0% 0% / 0.25);
+  --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
+  --shadow: 0 2px 6px -1px hsl(0 0% 0% / 0.35), 0 1px 3px -1px hsl(0 0% 0% / 0.3);
+  --shadow-md: 0 6px 16px -4px hsl(0 0% 0% / 0.4), 0 2px 6px -2px hsl(0 0% 0% / 0.3);
+  --shadow-lg: 0 12px 32px -8px hsl(0 0% 0% / 0.5), 0 4px 10px -4px hsl(0 0% 0% / 0.35);
+  --shadow-xl: 0 24px 48px -12px hsl(0 0% 0% / 0.6), 0 8px 16px -8px hsl(0 0% 0% / 0.4);
+  --shadow-2xl: 0 32px 64px -16px hsl(0 0% 0% / 0.7);
   --shadow-offset-x: 0px;
-  --shadow-offset-y: 0px;
-  --letter-spacing: -0.01em;
+  --shadow-offset-y: 1px;
+  --letter-spacing: 0em;
   --spacing: 0.25rem;
 }
 
@@ -175,9 +163,9 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: 'Outfit', sans-serif;
-  --font-mono: 'Fira Code', monospace;
-  --font-serif: 'Georgia', serif;
+  --font-sans: DM Sans, sans-serif;
+  --font-mono: Space Mono, monospace;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -192,7 +180,7 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
-  --radius: 0rem;
+  --radius: 0.75rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
@@ -216,13 +204,224 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+    overflow-wrap: break-word;
+  }
+
+  #root {
+    min-height: 100dvh;
   }
 
   [lang="ar"] {
     font-family: "UthmanicHafs", "Noto Sans Arabic", "Amiri", "Traditional Arabic", serif;
     font-weight: 400;
+  }
+
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+
+  dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Native seek slider — themed track, buffered layer and glowing thumb. */
+.seek-slider {
+  --seek-track-size: 0.375rem;
+  --seek-thumb-size: 0.875rem;
+  --seek-track: var(--muted);
+  --seek-buffered: color-mix(in oklab, var(--accent) 28%, var(--muted));
+  --seek-fill: var(--primary);
+  --seek-progress: 0%;
+  --seek-loaded: 0%;
+  --seek-glow: color-mix(in oklab, var(--primary) 20%, transparent);
+
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 100%;
+  block-size: 1.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.seek-slider:disabled {
+  cursor: default;
+}
+
+.seek-slider[data-loading="true"] {
+  --seek-fill: var(--seek-buffered);
+}
+
+.seek-slider:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.seek-slider::-webkit-slider-runnable-track {
+  block-size: var(--seek-track-size);
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--seek-fill) 0 var(--seek-progress),
+    var(--seek-buffered) var(--seek-progress) var(--seek-loaded),
+    var(--seek-track) var(--seek-loaded) 100%
+  );
+}
+
+.seek-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: var(--seek-thumb-size);
+  block-size: var(--seek-thumb-size);
+  margin-block-start: calc((var(--seek-track-size) - var(--seek-thumb-size)) / 2);
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--seek-fill);
+  box-shadow: 0 0 0 3px var(--seek-glow), 0 2px 6px hsl(25 20% 20% / 0.28);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+.seek-slider:hover:not(:disabled)::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 5px var(--seek-glow), 0 3px 8px hsl(25 20% 20% / 0.32);
+}
+
+.seek-slider:active:not(:disabled)::-webkit-slider-thumb {
+  transform: scale(0.95);
+}
+
+.seek-slider::-moz-range-track {
+  block-size: var(--seek-track-size);
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--seek-buffered) 0 var(--seek-loaded),
+    var(--seek-track) var(--seek-loaded) 100%
+  );
+}
+
+.seek-slider::-moz-range-progress {
+  block-size: var(--seek-track-size);
+  border: 0;
+  border-radius: 999px;
+  background: var(--seek-fill);
+}
+
+.seek-slider::-moz-range-thumb {
+  inline-size: var(--seek-thumb-size);
+  block-size: var(--seek-thumb-size);
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--seek-fill);
+  box-shadow: 0 0 0 3px var(--seek-glow), 0 2px 6px hsl(25 20% 20% / 0.28);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+.seek-slider:hover:not(:disabled)::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
+.seek-slider:active:not(:disabled)::-moz-range-thumb {
+  transform: scale(0.95);
+}
+
+.seek-slider[data-loading="true"]::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, var(--seek-track) 0%, var(--seek-buffered) 50%, var(--seek-track) 100%);
+  background-size: 200% 100%;
+  animation: seek-shimmer 1.8s linear infinite;
+}
+
+.seek-slider[data-loading="true"]::-moz-range-track {
+  background: linear-gradient(90deg, var(--seek-track) 0%, var(--seek-buffered) 50%, var(--seek-track) 100%);
+  background-size: 200% 100%;
+  animation: seek-shimmer 1.8s linear infinite;
+}
+
+@keyframes seek-shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* Download / cache progress — same palette, distinct sage fill. */
+.download-progress {
+  --download-fill: var(--accent);
+  --download-indeterminate-size: 30%;
+  --download-indeterminate-duration: 1.6s;
+
+  appearance: none;
+  -webkit-appearance: none;
+  inline-size: 100%;
+  block-size: 0.375rem;
+  border: 0 solid;
+  border-radius: 999px;
+  overflow: clip;
+  background: var(--muted);
+  box-shadow: inset 0 1px 2px hsl(25 20% 20% / 0.12);
+  container-type: inline-size;
+}
+
+.download-progress::-webkit-progress-bar {
+  background: transparent;
+}
+
+.download-progress::-webkit-progress-value {
+  border-radius: 999px;
+  background: var(--download-fill);
+  animation: none;
+}
+
+.download-progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: var(--download-fill);
+  animation: none;
+}
+
+.download-progress:indeterminate::-webkit-progress-value {
+  animation: download-indeterminate var(--download-indeterminate-duration) infinite linear;
+}
+
+.download-progress:indeterminate::-moz-progress-bar {
+  animation: download-indeterminate var(--download-indeterminate-duration) infinite linear;
+}
+
+@keyframes download-indeterminate {
+  from, to {
+    inline-size: var(--download-indeterminate-size);
+    margin-right: auto;
+  }
+  from { translate: -100%; }
+  to { translate: 100cqi; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seek-slider::-webkit-slider-thumb {
+    transition: none;
+  }
+  .seek-slider::-moz-range-thumb {
+    transition: none;
+  }
+  .seek-slider[data-loading="true"]::-webkit-slider-runnable-track {
+    animation-duration: 6s;
+  }
+  .seek-slider[data-loading="true"]::-moz-range-track {
+    animation-duration: 6s;
+  }
+  .download-progress {
+    --download-indeterminate-duration: 8s;
   }
 }

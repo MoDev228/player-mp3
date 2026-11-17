@@ -16,6 +16,7 @@ export default defineConfig({
       registerType: "autoUpdate",
 
       manifest: {
+        id: "/",
         name: "Quran - MP3",
         short_name: "Quran MP3",
         description: "Écoutez la récitation du Noble Coran verset par verset.",
@@ -23,8 +24,26 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         display: "standalone",
-        theme_color: "#212121",
-        background_color: "#212121",
+        display_override: ["standalone", "minimal-ui"],
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
+        categories: ["education", "lifestyle"],
+
+        shortcuts: [
+          {
+            name: "Ouvrir le lecteur",
+            short_name: "Lecteur",
+            description: "Reprendre l’écoute du Noble Coran",
+            url: "/#/lecteur",
+            icons: [
+              {
+                src: "/192x192.png",
+                sizes: "192x192",
+                type: "image/png",
+              },
+            ],
+          },
+        ],
 
         icons: [
           {

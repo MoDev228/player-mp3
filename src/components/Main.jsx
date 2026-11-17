@@ -1,9 +1,9 @@
 import PlayerCard from "./player/PlayerCard";
 
-function Main() {
+function Main({ theme, onToggleTheme }) {
   return (
-    <main className="w-full min-h-screen max-w-[1200px] mx-auto flex justify-center">
-      <PlayerCard />
+    <main className="w-full">
+      <PlayerCard theme={theme} onToggleTheme={onToggleTheme} />
     </main>
   );
 }

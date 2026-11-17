@@ -52,7 +52,10 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0) {
 
   const isLoading = loadedSurahNumber !== surahNumber && loadError.surahNumber !== surahNumber;
   const error = loadError.surahNumber === surahNumber ? loadError.message : "";
-  const currentAyah = loadedSurahNumber === surahNumber ? ayahs[ayahIndex] : undefined;
+  const safeAyahIndex = ayahs.length > 0
+    ? Math.min(Math.max(ayahIndex, 0), ayahs.length - 1)
+    : 0;
+  const currentAyah = loadedSurahNumber === surahNumber ? ayahs[safeAyahIndex] : undefined;
 
   return { surahs, ayahs, loadedSurahNumber, isLoading, error, currentAyah, surahsLoading, surahsError, retrySurahs, retrySurah };
 }

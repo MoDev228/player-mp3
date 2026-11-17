@@ -3,9 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" sizes="192x192" href="/192x192.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#212121" />
-    <title>Quran - MP3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      try {
+        if (localStorage.getItem("theme") === "dark") {
+          document.documentElement.classList.add("dark");
+          document
+            .querySelector('meta[name="theme-color"]')
+            .setAttribute("content", "#1a1714");
+        }
+      } catch {}
+    </script>
+    <meta
+      name="description"
+      content="Écoutez la récitation du Noble Coran verset par verset, hors connexion, sans compte et sans publicité."
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Quran MP3" />
+    <link rel="apple-touch-icon" href="/192x192.png" />
+    <title>Quran MP3 — Écoutez le Coran</title>
   </head>
   <body>
     <div id="root"></div>

@@ -18,6 +18,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [buffered, setBuffered] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [loadedAudioSource, setLoadedAudioSource] = useState(null);
@@ -52,6 +53,20 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     setCurrentTime(audio.currentTime);
   }, []);
 
+  const updateBuffered = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) {
+      setBuffered(0);
+      return;
+    }
+
+    let end = 0;
+    for (let index = 0; index < audio.buffered.length; index += 1) {
+      end = Math.max(end, audio.buffered.end(index));
+    }
+    setBuffered(Math.min(end / audio.duration, 1));
+  }, []);
+
   useEffect(() => {
     const audio = audioRef.current;
     resumePositionRef.current = resumePosition;
@@ -60,6 +75,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     audio.currentTime = 0;
     setCurrentTime(0);
     setDuration(0);
+    setBuffered(0);
     setLoadedAudioSource(null);
     setAudioError("");
     if (hasStartedRef.current) startPlayback();
@@ -83,6 +99,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     const audio = audioRef.current;
     if (!audio) return;
     setDuration(audio.duration || 0);
+    updateBuffered();
     setLoadedAudioSource(currentAyah?.audio ?? null);
 
     if (resumePositionRef.current > 0) {
@@ -104,6 +121,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     onLoadedMetadata: handleLoadedMetadata,
     onDurationChange: () => setDuration(audioRef.current?.duration || 0),
     onTimeUpdate: () => setCurrentTime(audioRef.current?.currentTime || 0),
+    onProgress: updateBuffered,
     onError: () => {
       if (currentAyah?.audio && hasStartedRef.current) {
         setIsPlaying(false);
@@ -120,6 +138,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     isAudioReady: Boolean(currentAyah?.audio && loadedAudioSource === currentAyah.audio),
     currentTime,
     duration,
+    buffered,
     volume,
     setVolume,
     isMuted,
