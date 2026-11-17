@@ -56,7 +56,7 @@ function Home({ theme, onToggleTheme }) {
     if (!savedPlayback) return;
 
     savePlayback({
-      surahNumber: savedPlayback.surahNumber,
+      ...savedPlayback,
       ayahIndex: 0,
       currentTime: 0,
     });

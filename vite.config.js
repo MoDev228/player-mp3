@@ -4,9 +4,42 @@ import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  AUDIO_EDITIONS,
+  TEXT_EDITIONS,
+  escapeRegExp,
+  getAudioCacheName,
+} from "./src/lib/quranEditions.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const editionPattern = [...AUDIO_EDITIONS, ...TEXT_EDITIONS]
+  .map((edition) => escapeRegExp(edition.id))
+  .join("|");
+
+const surahDataPattern = new RegExp(
+  `^https://api\\.alquran\\.cloud/v1/surah(?:\\/\\d+\\/(?:${editionPattern}))?$`,
+);
+
+const audioRoutes = AUDIO_EDITIONS.map((edition) => ({
+  urlPattern: new RegExp(
+    `^https://cdn\\.islamic\\.network/quran/audio/\\d+/${escapeRegExp(edition.id)}/\\d+\\.mp3$`,
+  ),
+  handler: "CacheFirst",
+  options: {
+    cacheName: getAudioCacheName(edition.id),
+    // Media elements issue opaque `Range` requests. `statuses: []` blocks
+    // Workbox from caching any fetched response, while cache hits are still
+    // served: the app stores complete files itself, so no partial response can
+    // poison offline playback.
+    cacheableResponse: { statuses: [] },
+    expiration: {
+      maxEntries: 1600,
+      maxAgeSeconds: 60 * 60 * 24 * 180,
+    },
+  },
+}));
 
 export default defineConfig({
   plugins: [
@@ -75,10 +108,10 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/api\.alquran\.cloud\/v1\/surah(?:\/\d+\/fr\.leclerc)?$/,
+            urlPattern: surahDataPattern,
             handler: "NetworkFirst",
             options: {
-              cacheName: "quran-surah-data",
+              cacheName: "quran-surah-data-v2",
               networkTimeoutSeconds: 3,
               cacheableResponse: { statuses: [0, 200] },
               expiration: {
@@ -87,22 +120,7 @@ export default defineConfig({
               },
             },
           },
-          {
-            urlPattern: /^https:\/\/cdn\.islamic\.network\/quran\/audio\/128\/fr\.leclerc\/\d+\.mp3$/,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "quran-audio-fr-v2",
-              // Media elements issue opaque `Range` requests. `statuses: []`
-              // blocks Workbox from caching any fetched response, while cache
-              // hits are still served: `useAudioCache` alone stores complete
-              // files, so no partial response can poison offline playback.
-              cacheableResponse: { statuses: [] },
-              expiration: {
-                maxEntries: 1600,
-                maxAgeSeconds: 60 * 60 * 24 * 180,
-              },
-            },
-          },
+          ...audioRoutes,
         ],
       },
     }),

@@ -5,25 +5,48 @@ import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { usePlayerKeyboardShortcuts } from "@/hooks/usePlayerKeyboardShortcuts";
 import { readSavedPlayback, savePlayback } from "@/lib/playbackStorage";
 import ThemeToggle from "@/components/ThemeToggle";
+import { getTextEdition } from "@/lib/quranEditions";
 import AudioControls from "./AudioControls";
 import AudioCacheStatus from "./AudioCacheStatus";
 import DownloadButton from "./DownloadButton";
 import AyahDisplay from "./AyahDisplay";
 import PlayerHeader from "./PlayerHeader";
 import ProgressBar from "./ProgressBar";
+import SettingsButton from "./SettingsButton";
 import SurahList from "./SurahList";
 import SurahListButton from "./SurahListButton";
 
-function PlayerCard({ theme, onToggleTheme }) {
+function PlayerCard({ theme, onToggleTheme, settings }) {
+  const { audioEdition, textEdition } = settings;
+  const textEditionConfig = getTextEdition(textEdition);
   const [savedPlayback] = useState(readSavedPlayback);
   const [surahNumber, setSurahNumber] = useState(() => savedPlayback?.surahNumber ?? 1);
   const [ayahIndex, setAyahIndex] = useState(() => savedPlayback?.ayahIndex ?? 0);
   const [isShuffle, setIsShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState("off");
   const [showSurahList, setShowSurahList] = useState(false);
-  const library = useQuranLibrary(surahNumber, ayahIndex);
-  const { surahs, ayahs, loadedSurahNumber, currentAyah, isLoading, error, surahsLoading, surahsError, retrySurahs, retrySurah } = library;
-  const audioCache = useAudioCache(ayahs, loadedSurahNumber, surahNumber, isLoading);
+  const library = useQuranLibrary(surahNumber, ayahIndex, settings);
+  const {
+    surahs,
+    ayahs,
+    loadedSurahNumber,
+    loadedAudioEdition,
+    currentAyah,
+    isLoading,
+    error,
+    surahsLoading,
+    surahsError,
+    retrySurahs,
+    retrySurah,
+  } = library;
+  const audioCacheReady = loadedAudioEdition === audioEdition && loadedSurahNumber === surahNumber;
+  const audioCache = useAudioCache(
+    ayahs,
+    audioCacheReady ? surahNumber : null,
+    surahNumber,
+    isLoading,
+    audioEdition,
+  );
   const { status: audioCacheStatus, downloadSurah, isOnline } = audioCache;
 
   const currentSurah = surahs.find((surah) => surah.number === surahNumber);
@@ -55,17 +78,34 @@ function PlayerCard({ theme, onToggleTheme }) {
     }
   }, [ayahs.length, safeAyahIndex, isShuffle, repeatMode, surahNumber]);
 
-  const resumePosition = savedPlayback?.surahNumber === surahNumber && savedPlayback?.ayahIndex === safeAyahIndex
-    ? savedPlayback.currentTime
-    : 0;
-  const player = useAudioPlayer(currentAyah, moveAyah, safeAyahIndex, ayahs.length, surahNumber, repeatMode, isShuffle, resumePosition);
+  const canResume = savedPlayback?.audioEdition === audioEdition
+    && savedPlayback?.surahNumber === surahNumber
+    && savedPlayback?.ayahIndex === safeAyahIndex;
+  const resumePosition = canResume ? savedPlayback.currentTime : 0;
+  const player = useAudioPlayer(
+    currentAyah,
+    moveAyah,
+    safeAyahIndex,
+    ayahs.length,
+    surahNumber,
+    repeatMode,
+    isShuffle,
+    resumePosition,
+    audioEdition,
+  );
   const { audioProps, audioError, isPlaying, currentTime, duration, buffered, volume, setVolume, isMuted, setIsMuted, handlePlayPause, retryPlayback, handleSeek, isAudioReady } = player;
   usePlayerKeyboardShortcuts({ handlePlayPause, moveAyah, setVolume, setIsMuted });
 
   useEffect(() => {
     if (!isAudioReady) return;
-    savePlayback({ surahNumber, ayahIndex: safeAyahIndex, currentTime });
-  }, [currentTime, isAudioReady, safeAyahIndex, surahNumber]);
+    savePlayback({
+      surahNumber,
+      ayahIndex: safeAyahIndex,
+      currentTime,
+      audioEdition,
+      textEdition,
+    });
+  }, [audioEdition, currentTime, isAudioReady, safeAyahIndex, surahNumber, textEdition]);
 
   function selectSurah(number) {
     setAyahIndex(0);
@@ -81,6 +121,7 @@ function PlayerCard({ theme, onToggleTheme }) {
         isOnline={isOnline}
         onDownload={downloadSurah}
       />
+      <SettingsButton />
       <ThemeToggle theme={theme} onToggleTheme={onToggleTheme} />
     </>
   );
@@ -99,7 +140,14 @@ function PlayerCard({ theme, onToggleTheme }) {
             }
             actions={headerActions}
           />
-          <AyahDisplay isLoading={isLoading} error={error} ayah={currentAyah} ayahCount={ayahs.length} onRetry={retrySurah} />
+          <AyahDisplay
+            isLoading={isLoading}
+            error={error}
+            ayah={currentAyah}
+            ayahCount={ayahs.length}
+            onRetry={retrySurah}
+            textEdition={textEditionConfig}
+          />
           <AudioCacheStatus status={audioCacheStatus} surahNumber={surahNumber} />
 
           {audioError && (

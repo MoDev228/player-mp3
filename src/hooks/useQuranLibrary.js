@@ -1,19 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSurah, getSurahs } from "@/services/quranApi";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { DEFAULT_SETTINGS } from "@/lib/quranEditions";
 
 const LOAD_ERROR_MESSAGE = "Impossible de charger cette sourate. Vérifie ta connexion et réessaie.";
 
-export function useQuranLibrary(surahNumber, ayahIndex = 0) {
+export function useQuranLibrary(surahNumber, ayahIndex = 0, settings = DEFAULT_SETTINGS) {
   const isOnline = useOnlineStatus();
+  const { audioEdition, textEdition } = settings ?? DEFAULT_SETTINGS;
   const [surahs, setSurahs] = useState([]);
-  const [ayahs, setAyahs] = useState([]);
-  const [loadedSurahNumber, setLoadedSurahNumber] = useState(null);
-  const [loadError, setLoadError] = useState({ surahNumber: null, message: "" });
+  const [surahData, setSurahData] = useState({ key: null, surahNumber: null, audioEdition: null, ayahs: [] });
+  const [loadError, setLoadError] = useState({ key: null, message: "" });
   const [surahRequest, setSurahRequest] = useState(0);
   const [surahsLoading, setSurahsLoading] = useState(true);
   const [surahsError, setSurahsError] = useState("");
   const [surahsRequest, setSurahsRequest] = useState(0);
+
+  const currentKey = `${surahNumber}|${audioEdition}|${textEdition}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -32,30 +35,45 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0) {
 
   useEffect(() => {
     let cancelled = false;
-    getSurah(surahNumber)
+    getSurah(surahNumber, { audioEdition, textEdition })
       .then((data) => {
         if (cancelled) return;
-        setAyahs(data.ayahs);
-        setLoadedSurahNumber(surahNumber);
-        setLoadError({ surahNumber: null, message: "" });
+        setSurahData({ key: currentKey, surahNumber, audioEdition, ayahs: data.ayahs });
+        setLoadError({ key: null, message: "" });
       })
       .catch(() => {
-        if (!cancelled) setLoadError({ surahNumber, message: LOAD_ERROR_MESSAGE });
+        if (!cancelled) setLoadError({ key: currentKey, message: LOAD_ERROR_MESSAGE });
       });
     return () => { cancelled = true; };
-  }, [isOnline, surahNumber, surahRequest]);
+  }, [audioEdition, currentKey, isOnline, surahNumber, surahRequest, textEdition]);
 
   const retrySurah = useCallback(() => {
-    setLoadError({ surahNumber: null, message: "" });
+    setLoadError({ key: null, message: "" });
     setSurahRequest((request) => request + 1);
   }, []);
 
-  const isLoading = loadedSurahNumber !== surahNumber && loadError.surahNumber !== surahNumber;
-  const error = loadError.surahNumber === surahNumber ? loadError.message : "";
+  const isLoaded = surahData.key === currentKey;
+  const keepsAudio = surahData.surahNumber === surahNumber && surahData.audioEdition === audioEdition;
+  const isLoading = !isLoaded && loadError.key !== currentKey;
+  const error = loadError.key === currentKey ? loadError.message : "";
+  const ayahs = surahData.ayahs;
   const safeAyahIndex = ayahs.length > 0
     ? Math.min(Math.max(ayahIndex, 0), ayahs.length - 1)
     : 0;
-  const currentAyah = loadedSurahNumber === surahNumber ? ayahs[safeAyahIndex] : undefined;
+  const currentAyah = isLoaded || keepsAudio ? ayahs[safeAyahIndex] : undefined;
 
-  return { surahs, ayahs, loadedSurahNumber, isLoading, error, currentAyah, surahsLoading, surahsError, retrySurahs, retrySurah };
+  return {
+    surahs,
+    ayahs,
+    loadedSurahNumber: surahData.surahNumber,
+    loadedAudioEdition: surahData.audioEdition,
+    isLoaded,
+    isLoading,
+    error,
+    currentAyah,
+    surahsLoading,
+    surahsError,
+    retrySurahs,
+    retrySurah,
+  };
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { removeCachedAudio, withCacheBust } from "@/lib/audioCache";
+import { DEFAULT_SETTINGS } from "@/lib/quranEditions";
 
 const PLAY_ERROR_MESSAGE = "Impossible de lire cet audio. Réessaie.";
 const LOAD_TIMEOUT_MS = 8000;
@@ -72,7 +73,17 @@ async function attemptPlay(audio, url, { reload = false } = {}) {
   }
 }
 
-export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, surahNumber, repeatMode, isShuffle, resumePosition = 0) {
+export function useAudioPlayer(
+  currentAyah,
+  moveAyah,
+  ayahIndex,
+  ayahCount,
+  surahNumber,
+  repeatMode,
+  isShuffle,
+  resumePosition = 0,
+  audioEdition = DEFAULT_SETTINGS.audioEdition,
+) {
   const audioRef = useRef(null);
   const hasStartedRef = useRef(false);
   const [audioError, setAudioError] = useState("");
@@ -99,14 +110,14 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
       // A corrupt or partial Cache Storage entry can make a media element fail
       // before it ever reaches the network. Drop it, then retry on a URL the
       // service worker's audio route cannot match.
-      await removeCachedAudio(source);
+      await removeCachedAudio(source, audioEdition);
       result = await attemptPlay(audio, withCacheBust(source, "retry"), { reload: true });
     }
 
     if (!result.ok) {
       setAudioError(getPlaybackErrorMessage(audio, result.error));
     }
-  }, [currentAyah?.audio]);
+  }, [audioEdition, currentAyah?.audio]);
 
   const handlePlayPause = useCallback(() => {
     const audio = audioRef.current;

@@ -1,19 +1,19 @@
 import Main from "./components/Main";
 import Home from "./components/Home";
-import { useEffect, useState } from "react";
-import { flushSync } from "react-dom";
+import SettingsPage from "./components/settings/SettingsPage";
+import { useCallback, useEffect, useState } from "react";
+import { removeLegacyCaches } from "@/lib/cacheCleanup";
+import { readSettings, saveSettings } from "@/lib/settingsStorage";
 
+const HOME_HASH = "#/";
 const PLAYER_HASH = "#/lecteur";
+const SETTINGS_HASH = "#/reglages";
 
 function readRoute() {
   if (typeof window === "undefined") return "home";
-  return window.location.hash === PLAYER_HASH ? "player" : "home";
-}
-
-function focusPageHeading() {
-  requestAnimationFrame(() => {
-    document.querySelector("main h1")?.focus({ preventScroll: true });
-  });
+  if (window.location.hash === PLAYER_HASH) return "player";
+  if (window.location.hash === SETTINGS_HASH) return "settings";
+  return "home";
 }
 
 function App() {
@@ -22,6 +22,7 @@ function App() {
     return localStorage.getItem("theme") === "dark" ? "dark" : "light";
   });
   const [route, setRoute] = useState(readRoute);
+  const [settings, setSettings] = useState(readSettings);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -39,39 +40,27 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (!window.location.hash) {
-      history.replaceState(null, "", "#/");
+    if (!window.location.hash || window.location.hash === HOME_HASH) {
+      history.replaceState(null, "", HOME_HASH);
     }
+  }, []);
+
+  useEffect(() => {
+    removeLegacyCaches();
   }, []);
 
   useEffect(() => {
     document.title = route === "player"
       ? "Quran MP3 — Lecteur"
-      : "Quran MP3 — Accueil";
+      : route === "settings"
+        ? "Quran MP3 — Réglages"
+        : "Quran MP3 — Accueil";
+    document.querySelector("main h1")?.focus({ preventScroll: true });
   }, [route]);
 
   useEffect(() => {
     function handleHashChange() {
-      const nextRoute = readRoute();
-      const updateRoute = () => setRoute(nextRoute);
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-
-      if (document.startViewTransition && !prefersReducedMotion) {
-        try {
-          const transition = document.startViewTransition(() => {
-            flushSync(updateRoute);
-          });
-          transition.finished.finally(focusPageHeading);
-        } catch {
-          updateRoute();
-          focusPageHeading();
-        }
-      } else {
-        updateRoute();
-        focusPageHeading();
-      }
+      setRoute(readRoute());
     }
 
     window.addEventListener("hashchange", handleHashChange);
@@ -82,11 +71,29 @@ function App() {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   }
 
-  return route === "player" ? (
-    <Main theme={theme} onToggleTheme={toggleTheme} />
-  ) : (
-    <Home theme={theme} onToggleTheme={toggleTheme} />
-  );
+  const handleSaveSettings = useCallback((nextSettings) => {
+    saveSettings(nextSettings);
+    setSettings(nextSettings);
+  }, []);
+
+  if (route === "player") {
+    return (
+      <Main theme={theme} onToggleTheme={toggleTheme} settings={settings} />
+    );
+  }
+
+  if (route === "settings") {
+    return (
+      <SettingsPage
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        settings={settings}
+        onSave={handleSaveSettings}
+      />
+    );
+  }
+
+  return <Home theme={theme} onToggleTheme={toggleTheme} />;
 }
 
 export default App;
