@@ -12,7 +12,7 @@ function AyahDisplay({ isLoading, error, ayah, ayahCount, onRetry }) {
         </div>
       ) : ayah ? (
         <div className="my-auto w-full text-center">
-          <p lang="ar" dir="rtl" className="text-xl leading-relaxed sm:text-2xl lg:text-3xl">
+          <p lang="ar" dir="rtl" className="text-xl leading-[2.2] sm:text-2xl lg:text-3xl">
             {ayah.text.replace(/^\uFEFF/, "")}
           </p>
           <p className="mt-3 text-xs font-medium tracking-wide text-muted-foreground">

@@ -69,7 +69,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         globPatterns: [
-          "**/*.{js,css,html,ico,png,svg,webmanifest}",
+          "**/*.{js,css,html,ico,png,svg,webmanifest,woff2}",
         ],
 
         maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,

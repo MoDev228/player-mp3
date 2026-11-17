@@ -1,11 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
-
-@font-face {
-  font-family: "UthmanicHafs";
-  src: url("https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2") format("woff2");
-  font-display: swap;
-}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -221,8 +214,9 @@
   }
 
   [lang="ar"] {
-    font-family: "UthmanicHafs", "Noto Sans Arabic", "Amiri", "Traditional Arabic", serif;
+    font-family: "Amiri", "Noto Naskh Arabic", "Traditional Arabic", serif;
     font-weight: 400;
+    font-size-adjust: from-font;
   }
 
   dialog:modal {
@@ -423,5 +417,12 @@
   }
   .download-progress {
     --download-indeterminate-duration: 8s;
+  }
+}
+
+/* Older browsers ignore `font-size-adjust`; nudge the Naskh text scale. */
+@supports not (font-size-adjust: from-font) {
+  [lang="ar"] {
+    font-size: 1.05em;
   }
 }
