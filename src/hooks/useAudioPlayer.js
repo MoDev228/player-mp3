@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { removeCachedAudio, withCacheBust } from "@/lib/audioCache";
 
 const PLAY_ERROR_MESSAGE = "Impossible de lire cet audio. Réessaie.";
+const LOAD_TIMEOUT_MS = 8000;
 
 function getPlaybackErrorMessage(audio, error) {
   if (!navigator.onLine) return "Cet audio n’est pas disponible hors connexion. Connecte-toi puis télécharge la sourate pour l’écouter.";
@@ -9,6 +11,65 @@ function getPlaybackErrorMessage(audio, error) {
   if (audio?.error?.code === 3) return "Le fichier audio n’a pas pu être décodé. Réessaie.";
   if (audio?.error?.code === 4) return "Ce format audio n’est pas pris en charge par le navigateur.";
   return PLAY_ERROR_MESSAGE;
+}
+
+function waitForPlayable(audio) {
+  if (audio.readyState >= 2) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    let timeoutId;
+
+    function cleanup() {
+      window.clearTimeout(timeoutId);
+      audio.removeEventListener("loadeddata", handleReady);
+      audio.removeEventListener("canplay", handleReady);
+      audio.removeEventListener("error", handleError);
+    }
+
+    function handleReady() {
+      cleanup();
+      resolve();
+    }
+
+    function handleError() {
+      cleanup();
+      reject(audio.error ?? new Error("Audio indisponible."));
+    }
+
+    audio.addEventListener("loadeddata", handleReady, { once: true });
+    audio.addEventListener("canplay", handleReady, { once: true });
+    audio.addEventListener("error", handleError, { once: true });
+    timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Chargement audio trop long."));
+    }, LOAD_TIMEOUT_MS);
+  });
+}
+
+async function attemptPlay(audio, url, { reload = false } = {}) {
+  if (reload || audio.currentSrc !== url) {
+    audio.src = url;
+    audio.load();
+  }
+
+  try {
+    await audio.play();
+    return { ok: true };
+  } catch (error) {
+    // `load()` can abort the first `play()` promise. Waiting for the media to
+    // become playable and calling `play()` again avoids that race.
+    if (error?.name === "AbortError") {
+      try {
+        await waitForPlayable(audio);
+        await audio.play();
+        return { ok: true };
+      } catch (retryError) {
+        return { ok: false, error: retryError };
+      }
+    }
+
+    return { ok: false, error };
+  }
 }
 
 export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, surahNumber, repeatMode, isShuffle, resumePosition = 0) {
@@ -24,16 +85,26 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
   const [loadedAudioSource, setLoadedAudioSource] = useState(null);
   const resumePositionRef = useRef(resumePosition);
 
-  const startPlayback = useCallback(async (forceReload = false) => {
+  const startPlayback = useCallback(async () => {
     const audio = audioRef.current;
-    if (!audio || !currentAyah?.audio) return;
+    const source = currentAyah?.audio;
+    if (!audio || !source) return;
+
     hasStartedRef.current = true;
     setAudioError("");
-    try {
-      if (forceReload || audio.error) audio.load();
-      await audio.play();
-    } catch (error) {
-      setAudioError(getPlaybackErrorMessage(audio, error));
+
+    let result = await attemptPlay(audio, source);
+
+    if (!result.ok) {
+      // A corrupt or partial Cache Storage entry can make a media element fail
+      // before it ever reaches the network. Drop it, then retry on a URL the
+      // service worker's audio route cannot match.
+      await removeCachedAudio(source);
+      result = await attemptPlay(audio, withCacheBust(source, "retry"), { reload: true });
+    }
+
+    if (!result.ok) {
+      setAudioError(getPlaybackErrorMessage(audio, result.error));
     }
   }, [currentAyah?.audio]);
 
@@ -44,7 +115,7 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     else audio.pause();
   }, [currentAyah?.audio, startPlayback]);
 
-  const retryPlayback = useCallback(() => startPlayback(true), [startPlayback]);
+  const retryPlayback = useCallback(() => startPlayback(), [startPlayback]);
 
   const handleSeek = useCallback((time) => {
     const audio = audioRef.current;
@@ -71,8 +142,11 @@ export function useAudioPlayer(currentAyah, moveAyah, ayahIndex, ayahCount, sura
     const audio = audioRef.current;
     resumePositionRef.current = resumePosition;
     if (!audio || !currentAyah?.audio) return;
+
     audio.pause();
-    audio.currentTime = 0;
+    if (audio.readyState > 0) {
+      try { audio.currentTime = 0; } catch { /* Media not seekable yet. */ }
+    }
     setCurrentTime(0);
     setDuration(0);
     setBuffered(0);

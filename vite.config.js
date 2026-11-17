@@ -91,8 +91,12 @@ export default defineConfig({
             urlPattern: /^https:\/\/cdn\.islamic\.network\/quran\/audio\/128\/fr\.leclerc\/\d+\.mp3$/,
             handler: "CacheFirst",
             options: {
-              cacheName: "quran-audio-fr",
-              cacheableResponse: { statuses: [0, 200] },
+              cacheName: "quran-audio-fr-v2",
+              // Media elements issue opaque `Range` requests. `statuses: []`
+              // blocks Workbox from caching any fetched response, while cache
+              // hits are still served: `useAudioCache` alone stores complete
+              // files, so no partial response can poison offline playback.
+              cacheableResponse: { statuses: [] },
               expiration: {
                 maxEntries: 1600,
                 maxAgeSeconds: 60 * 60 * 24 * 180,
