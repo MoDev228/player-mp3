@@ -6,23 +6,24 @@ import {
   Shuffle,
   Repeat,
   Repeat1,
-  Volume2,
-  VolumeX,
+  RotateCcw,
 } from "lucide-react";
+
+function formatPlaybackRate(rate) {
+  return rate.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+}
 
 function AudioControls({
   onPlayPause,
   isPlaying,
   onNext,
   onPrevious,
-  volume,
-  onVolumeChange,
   isShuffle,
   onToggleShuffle,
   repeatMode,
   onToggleRepeat,
-  isMuted,
-  onToggleMute,
+  playbackRate,
+  onPlaybackRateChange,
 }) {
   const secondaryButton =
     "flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -103,29 +104,26 @@ function AudioControls({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          aria-label={isMuted ? "Activer le son" : "Couper le son"}
-          aria-pressed={isMuted || volume === 0}
-          onClick={onToggleMute}
+          aria-label="Réinitialiser la vitesse de lecture à 1×"
+          onClick={() => onPlaybackRateChange(1)}
           className={secondaryButton}
         >
-          {isMuted || volume === 0 ? (
-            <VolumeX size={18} aria-hidden="true" />
-          ) : (
-            <Volume2 size={18} aria-hidden="true" />
-          )}
+          <RotateCcw size={16} aria-hidden="true" />
         </button>
         <input
           type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={isMuted ? 0 : volume}
-          onChange={(event) => {
-            onVolumeChange(Number(event.target.value));
-          }}
-          aria-label="Régler le volume"
+          min="0.5"
+          max="2"
+          step="0.05"
+          value={playbackRate}
+          onChange={(event) => onPlaybackRateChange(Number(event.target.value))}
+          aria-label="Vitesse de lecture"
+          aria-valuetext={`${formatPlaybackRate(playbackRate)} fois la vitesse normale`}
           className="h-1.5 w-full cursor-pointer accent-primary"
         />
+        <span aria-hidden="true" className="w-10 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+          {formatPlaybackRate(playbackRate)}×
+        </span>
       </div>
     </div>
   );

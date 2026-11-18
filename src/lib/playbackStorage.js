@@ -6,6 +6,18 @@ import {
 
 const STORAGE_KEY = "quran-player-playback-v1";
 
+export const DEFAULT_PLAYBACK_RATE = 1;
+export const MIN_PLAYBACK_RATE = 0.5;
+export const MAX_PLAYBACK_RATE = 2;
+
+export function normalizePlaybackRate(value) {
+  const rate = Number(value);
+  if (!Number.isFinite(rate)) return DEFAULT_PLAYBACK_RATE;
+
+  const rounded = Math.round(rate * 100) / 100;
+  return Math.min(MAX_PLAYBACK_RATE, Math.max(MIN_PLAYBACK_RATE, rounded));
+}
+
 export function readSavedPlayback() {
   if (typeof localStorage === "undefined") return null;
 
@@ -25,6 +37,7 @@ export function readSavedPlayback() {
       textEdition: isValidTextEdition(saved.textEdition)
         ? saved.textEdition
         : DEFAULT_SETTINGS.textEdition,
+      playbackRate: normalizePlaybackRate(saved.playbackRate),
     };
   } catch {
     return null;

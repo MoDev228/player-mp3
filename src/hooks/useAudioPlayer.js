@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { removeCachedAudio, withCacheBust } from "@/lib/audioCache";
+import { normalizePlaybackRate } from "@/lib/playbackStorage";
 import { DEFAULT_SETTINGS } from "@/lib/quranEditions";
 
 const PLAY_ERROR_MESSAGE = "Impossible de lire cet audio. Réessaie.";
@@ -83,19 +84,28 @@ export function useAudioPlayer(
   isShuffle,
   resumePosition = 0,
   audioEdition = DEFAULT_SETTINGS.audioEdition,
-  { stopAtEnd = false, onStopAtEnd = null } = {},
+  { stopAtEnd = false, onStopAtEnd = null, initialPlaybackRate = 1 } = {},
 ) {
   const audioRef = useRef(null);
   const hasStartedRef = useRef(false);
+  const [playbackRate, setPlaybackRateState] = useState(() => normalizePlaybackRate(initialPlaybackRate));
   const [audioError, setAudioError] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
   const [loadedAudioSource, setLoadedAudioSource] = useState(null);
   const resumePositionRef = useRef(resumePosition);
+
+  const setPlaybackRate = useCallback((value) => {
+    const rate = normalizePlaybackRate(value);
+    setPlaybackRateState(rate);
+    if (audioRef.current) audioRef.current.playbackRate = rate;
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = playbackRate;
+  }, [playbackRate]);
 
   const startPlayback = useCallback(async () => {
     const audio = audioRef.current;
@@ -167,10 +177,6 @@ export function useAudioPlayer(
     if (hasStartedRef.current) startPlayback();
   }, [currentAyah?.audio, resumePosition, startPlayback]);
 
-  useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
-  }, [isMuted, volume]);
-
   const handleEnded = useCallback(() => {
     if (stopAtEnd) {
       audioRef.current?.pause();
@@ -235,13 +241,11 @@ export function useAudioPlayer(
     currentTime,
     duration,
     buffered,
-    volume,
-    setVolume,
-    isMuted,
-    setIsMuted,
     handlePlayPause,
     pause,
     retryPlayback,
     handleSeek,
+    playbackRate,
+    setPlaybackRate,
   };
 }

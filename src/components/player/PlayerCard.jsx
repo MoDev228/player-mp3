@@ -129,10 +129,14 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
     isShuffle,
     resumePosition,
     audioEdition,
-    { stopAtEnd: sleepTimer.stopAtEnd, onStopAtEnd: sleepTimer.cancel },
+    {
+      stopAtEnd: sleepTimer.stopAtEnd,
+      onStopAtEnd: sleepTimer.cancel,
+      initialPlaybackRate: savedPlayback?.playbackRate,
+    },
   );
-  const { audioProps, audioError, isPlaying, currentTime, duration, buffered, volume, setVolume, isMuted, setIsMuted, handlePlayPause, retryPlayback, handleSeek, isAudioReady } = player;
-  usePlayerKeyboardShortcuts({ handlePlayPause, moveAyah, setVolume, setIsMuted });
+  const { audioProps, audioError, isPlaying, currentTime, duration, buffered, handlePlayPause, retryPlayback, handleSeek, isAudioReady, playbackRate, setPlaybackRate } = player;
+  usePlayerKeyboardShortcuts({ handlePlayPause, moveAyah });
 
   useEffect(() => {
     pauseRef.current = player.pause;
@@ -150,8 +154,9 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
       currentTime,
       audioEdition,
       textEdition,
+      playbackRate,
     });
-  }, [audioEdition, currentTime, isAudioReady, safeAyahIndex, surahNumber, textEdition]);
+  }, [audioEdition, currentTime, isAudioReady, playbackRate, safeAyahIndex, surahNumber, textEdition]);
 
   function selectSurah(number) {
     setAyahIndex(0);
@@ -252,14 +257,12 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
               isPlaying={isPlaying}
               onNext={() => moveAyah(1)}
               onPrevious={() => moveAyah(-1)}
-              volume={volume}
-              onVolumeChange={(value) => { setVolume(value); if (value > 0) setIsMuted(false); }}
               isShuffle={isShuffle}
               onToggleShuffle={() => setIsShuffle((value) => !value)}
               repeatMode={repeatMode}
               onToggleRepeat={() => setRepeatMode((mode) => mode === "off" ? "all" : mode === "all" ? "one" : "off")}
-              isMuted={isMuted}
-              onToggleMute={() => setIsMuted((muted) => !muted)}
+              playbackRate={playbackRate}
+              onPlaybackRateChange={setPlaybackRate}
             />
             <PlayerTools
               openDialog={openDialog}

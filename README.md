@@ -9,8 +9,9 @@ Quran - MP3 est un lecteur du Coran utilisable sur ordinateur et sur mobile. Il 
 ## Fonctionnalités
 
 - Parcourir les 114 sourates et choisir un verset avec les commandes du lecteur.
-- Lire, mettre en pause, avancer ou reculer, régler le volume et déplacer la lecture.
+- Lire, mettre en pause, avancer ou reculer et déplacer la lecture.
 - Activer la lecture aléatoire et la répétition d’un verset ou de la sourate.
+- Régler la vitesse de lecture de 0,5× à 2× et revenir à 1× d’un bouton ; le réglage est mémorisé sur l’appareil.
 - Enregistrer des versets dans des signets et y revenir rapidement.
 - Rechercher un verset par son numéro ou par son texte dans la sourate en cours.
 - Définir une boucle entre deux versets avec « Boucle » (le premier appui choisit le début, le second la fin).
@@ -53,8 +54,6 @@ La commande `pnpm lint` lance Oxlint.
 | --- | --- |
 | `Espace` | Lecture ou pause |
 | `←` / `→` | Verset précédent ou suivant |
-| `↑` / `↓` | Augmenter ou réduire le volume |
-| `M` | Activer ou couper le son |
 
 ## Sources des données
 
