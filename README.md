@@ -59,7 +59,7 @@ La commande `pnpm lint` lance Oxlint.
 
 Les textes et les noms de sourates proviennent de [QuranEnc.com](https://quranenc.com/). Les récitations arabes et la voix française de Youssouf Leclerc sont diffusées par le CDN Islamic Network (AlQuran Cloud).
 
-- Récitations audio (CDN Islamic Network) : arabe — Saʿūd ash-Shuraym, Abū Bakr ash-Shāṭirī, Maḥmūd Khalīl al-Ḥuṣary (dont la version *mujawwad*), ʿAbd ar-Raḥmān as-Sudays, Māher al-Muʿayqlī, ʿAlī al-Ḥudhayfī, ʿAbdullāh Baṣfar, Ḥānī ar-Rifāʿī et Ayman Suwaid ; français — Youssouf Leclerc (`fr.leclerc`). La traduction française lue de Rachid Maach (`french_rashid`) provient de QuranEnc.
+- Récitations audio (CDN Islamic Network) : arabe — Saʿūd ash-Shuraym, Abū Bakr ash-Shāṭirī, Maḥmūd Khalīl al-Ḥuṣary (dont la version *mujawwad*), ʿAbd ar-Raḥmān as-Sudays, Māher al-Muʿayqlī, ʿAlī al-Ḥudhayfī, ʿAbdullāh Baṣfar, Ḥānī ar-Rifāʿī, Ayman Suwaid, Aḥmed ibn ʿAlī al-ʿAjamī, Muḥammad Ayyūb et Muḥammad Jibrīl ; français — Youssouf Leclerc (`fr.leclerc`). La traduction française lue de Rachid Maach (`french_rashid`) provient de QuranEnc.
 - Textes affichés : texte arabe othmanien, traduction française de Rachid Maach ou du Centre International Nûr (`french_montada`, QuranEnc) ; traduction de Mohammed Hamidullah (`fr.hamidullah`, AlQuran Cloud), qui correspond à la récitation française de Youssouf Leclerc.
 - Les métadonnées des sourates non fournies par QuranEnc sont embarquées dans l’application.
 

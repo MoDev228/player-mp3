@@ -120,6 +120,33 @@ export const AUDIO_EDITIONS = [
     hint: "Récitation arabe mélodique, verset par verset.",
     credit: "AlQuran Cloud",
   },
+  {
+    id: "ar.ahmedajamy",
+    audioSource: "alquran",
+    bitrate: 128,
+    language: "ar",
+    label: "Arabe — Aḥmed ibn ʿAlī al-ʿAjamī",
+    hint: "Récitation arabe, verset par verset.",
+    credit: "AlQuran Cloud",
+  },
+  {
+    id: "ar.muhammadayyoub",
+    audioSource: "alquran",
+    bitrate: 128,
+    language: "ar",
+    label: "Arabe — Muḥammad Ayyūb",
+    hint: "Récitation arabe, verset par verset.",
+    credit: "AlQuran Cloud",
+  },
+  {
+    id: "ar.muhammadjibreel",
+    audioSource: "alquran",
+    bitrate: 128,
+    language: "ar",
+    label: "Arabe — Muḥammad Jibrīl",
+    hint: "Récitation arabe, verset par verset.",
+    credit: "AlQuran Cloud",
+  },
 ];
 
 export const TEXT_EDITIONS = [
