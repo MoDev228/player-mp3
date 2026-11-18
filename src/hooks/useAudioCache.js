@@ -16,6 +16,7 @@ export function useAudioCache(
   surahNumber,
   isSurahLoading = false,
   audioEdition = DEFAULT_SETTINGS.audioEdition,
+  revision = 0,
 ) {
   const [status, setStatus] = useState(null);
   const isOnline = useOnlineStatus();
@@ -49,7 +50,7 @@ export function useAudioCache(
 
     inspectCache();
     return () => { cancelled = true; };
-  }, [audioEdition, audioUrls, ayahs.length, loadedSurahNumber, surahNumber]);
+  }, [audioEdition, audioUrls, ayahs.length, loadedSurahNumber, revision, surahNumber]);
 
   const downloadSurah = useCallback(async () => {
     if (!isOnline || loadedSurahNumber !== surahNumber || !audioUrls.length) return;

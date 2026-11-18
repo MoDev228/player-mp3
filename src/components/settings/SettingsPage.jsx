@@ -161,6 +161,27 @@ function SettingsPage({ theme, onToggleTheme, settings, onSave }) {
             onChange={(value) => update("textEdition", value)}
           />
 
+          <label
+            htmlFor="bilingual"
+            className="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl border border-border bg-background/60 px-4 py-3 transition-colors hover:bg-muted focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-card"
+          >
+            <input
+              id="bilingual"
+              type="checkbox"
+              checked={draft.bilingual}
+              onChange={(event) => update("bilingual", event.target.checked)}
+              className="h-4 w-4 shrink-0"
+            />
+            <span className="min-w-0">
+              <span className="block text-sm font-medium text-card-foreground">
+                Afficher aussi le texte arabe
+              </span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Affiche le texte arabe au-dessus de la traduction choisie, avec la police Hafs.
+              </span>
+            </span>
+          </label>
+
           <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
             <button
               type="button"

@@ -1,23 +1,36 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuranLibrary } from "@/hooks/useQuranLibrary";
 import { useAudioCache } from "@/hooks/useAudioCache";
 import { useAudioPlayer } from "@/hooks/useAudioPlayer";
 import { usePlayerKeyboardShortcuts } from "@/hooks/usePlayerKeyboardShortcuts";
+import { useSleepTimer } from "@/hooks/useSleepTimer";
+import {
+  findBookmark,
+  readBookmarks,
+  removeBookmark,
+  saveBookmarks,
+  toggleBookmark,
+} from "@/lib/bookmarkStorage";
 import { readSavedPlayback, savePlayback } from "@/lib/playbackStorage";
 import ThemeToggle from "@/components/ThemeToggle";
 import { getTextEdition } from "@/lib/quranEditions";
 import AudioControls from "./AudioControls";
 import AudioCacheStatus from "./AudioCacheStatus";
-import DownloadButton from "./DownloadButton";
 import AyahDisplay from "./AyahDisplay";
+import BookmarkDialog from "./BookmarkDialog";
+import DownloadButton from "./DownloadButton";
+import OfflineManagerDialog from "./OfflineManagerDialog";
 import PlayerHeader from "./PlayerHeader";
+import PlayerTools from "./PlayerTools";
 import ProgressBar from "./ProgressBar";
 import SettingsButton from "./SettingsButton";
+import SleepTimerDialog from "./SleepTimerDialog";
 import SurahList from "./SurahList";
 import SurahListButton from "./SurahListButton";
+import VerseSearchDialog from "./VerseSearchDialog";
 
 function PlayerCard({ theme, onToggleTheme, settings }) {
-  const { audioEdition, textEdition } = settings;
+  const { audioEdition, textEdition, bilingual } = settings;
   const textEditionConfig = getTextEdition(textEdition);
   const [savedPlayback] = useState(readSavedPlayback);
   const [surahNumber, setSurahNumber] = useState(() => savedPlayback?.surahNumber ?? 1);
@@ -25,6 +38,13 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
   const [isShuffle, setIsShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState("off");
   const [showSurahList, setShowSurahList] = useState(false);
+  const [openDialog, setOpenDialog] = useState(null);
+  const [bookmarks, setBookmarks] = useState(readBookmarks);
+  const [loopRange, setLoopRange] = useState(null);
+  const [cacheRevision, setCacheRevision] = useState(0);
+  const pauseRef = useRef(null);
+
+  const sleepTimer = useSleepTimer(() => pauseRef.current?.());
   const library = useQuranLibrary(surahNumber, ayahIndex, settings);
   const {
     surahs,
@@ -46,15 +66,32 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
     surahNumber,
     isLoading,
     audioEdition,
+    cacheRevision,
   );
   const { status: audioCacheStatus, downloadSurah, isOnline } = audioCache;
 
   const currentSurah = surahs.find((surah) => surah.number === surahNumber);
   const surahAyahCount = ayahs.length > 0 ? ayahs.length : (currentSurah?.numberOfAyahs ?? 0);
   const safeAyahIndex = Math.min(Math.max(ayahIndex, 0), Math.max(surahAyahCount - 1, 0));
+  const settingsKey = `${audioEdition}|${textEdition}`;
+  const activeLoopRange = loopRange?.surahNumber === surahNumber
+    && loopRange?.settingsKey === settingsKey
+    ? loopRange
+    : null;
+  const loopState = !activeLoopRange ? "off" : activeLoopRange.end === null ? "start" : "active";
 
   const moveAyah = useCallback((direction) => {
     if (!ayahs.length) return;
+
+    if (activeLoopRange?.end !== null && activeLoopRange?.end !== undefined) {
+      setAyahIndex((current) => {
+        const index = Math.min(Math.max(current, 0), ayahs.length - 1);
+        if (direction > 0) return index >= activeLoopRange.end ? activeLoopRange.start : index + 1;
+        return index <= activeLoopRange.start ? activeLoopRange.end : index - 1;
+      });
+      return;
+    }
+
     if (isShuffle && ayahs.length > 1) {
       setAyahIndex((current) => {
         let next = Math.min(Math.max(current, 0), ayahs.length - 1);
@@ -76,7 +113,7 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
       setAyahIndex(0);
       setSurahNumber((number) => number - 1);
     }
-  }, [ayahs.length, safeAyahIndex, isShuffle, repeatMode, surahNumber]);
+  }, [activeLoopRange, ayahs.length, isShuffle, repeatMode, safeAyahIndex, surahNumber]);
 
   const canResume = savedPlayback?.audioEdition === audioEdition
     && savedPlayback?.surahNumber === surahNumber
@@ -92,9 +129,18 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
     isShuffle,
     resumePosition,
     audioEdition,
+    { stopAtEnd: sleepTimer.stopAtEnd, onStopAtEnd: sleepTimer.cancel },
   );
   const { audioProps, audioError, isPlaying, currentTime, duration, buffered, volume, setVolume, isMuted, setIsMuted, handlePlayPause, retryPlayback, handleSeek, isAudioReady } = player;
   usePlayerKeyboardShortcuts({ handlePlayPause, moveAyah, setVolume, setIsMuted });
+
+  useEffect(() => {
+    pauseRef.current = player.pause;
+  }, [player.pause]);
+
+  useEffect(() => {
+    saveBookmarks(bookmarks);
+  }, [bookmarks]);
 
   useEffect(() => {
     if (!isAudioReady) return;
@@ -113,13 +159,43 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
     setShowSurahList(false);
   }
 
+  function goToAyah(targetSurahNumber, targetAyahIndex) {
+    setSurahNumber(targetSurahNumber);
+    setAyahIndex(targetAyahIndex);
+    setOpenDialog(null);
+  }
+
+  function handleToggleLoop() {
+    if (!activeLoopRange) {
+      setLoopRange({ surahNumber, settingsKey, start: safeAyahIndex, end: null });
+    } else if (activeLoopRange.end === null) {
+      setLoopRange(safeAyahIndex > activeLoopRange.start
+        ? { ...activeLoopRange, end: safeAyahIndex }
+        : null);
+    } else {
+      setLoopRange(null);
+    }
+  }
+
+  async function handleDownload() {
+    await downloadSurah();
+    setCacheRevision((revision) => revision + 1);
+  }
+
+  function handleCacheDeleted() {
+    setCacheRevision((revision) => revision + 1);
+  }
+
+  const bookmarked = Boolean(findBookmark(bookmarks, surahNumber, safeAyahIndex));
+  const showArabic = Boolean(bilingual) && textEditionConfig.language !== "ar";
+
   const headerActions = (
     <>
       <DownloadButton
         status={audioCacheStatus}
         surahNumber={surahNumber}
         isOnline={isOnline}
-        onDownload={downloadSurah}
+        onDownload={handleDownload}
       />
       <SettingsButton />
       <ThemeToggle theme={theme} onToggleTheme={onToggleTheme} />
@@ -147,6 +223,9 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
             ayahCount={ayahs.length}
             onRetry={retrySurah}
             textEdition={textEditionConfig}
+            showArabic={showArabic}
+            bookmarked={bookmarked}
+            onToggleBookmark={() => setBookmarks((current) => toggleBookmark(current, surahNumber, safeAyahIndex))}
           />
           <AudioCacheStatus status={audioCacheStatus} surahNumber={surahNumber} />
 
@@ -182,6 +261,16 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
               isMuted={isMuted}
               onToggleMute={() => setIsMuted((muted) => !muted)}
             />
+            <PlayerTools
+              openDialog={openDialog}
+              onOpenSearch={() => setOpenDialog("search")}
+              onOpenBookmarks={() => setOpenDialog("bookmarks")}
+              onOpenOffline={() => setOpenDialog("offline")}
+              loopState={loopState}
+              onToggleLoop={handleToggleLoop}
+              sleepLabel={sleepTimer.label}
+              onOpenSleep={() => setOpenDialog("sleep")}
+            />
           </div>
         </div>
 
@@ -194,6 +283,39 @@ function PlayerCard({ theme, onToggleTheme, settings }) {
           isLoading={surahsLoading}
           error={surahsError}
           onRetry={retrySurahs}
+        />
+        <VerseSearchDialog
+          open={openDialog === "search"}
+          onClose={() => setOpenDialog(null)}
+          ayahs={ayahs}
+          surahName={currentSurah?.englishName ?? `Sourate ${surahNumber}`}
+          onSelect={(index) => goToAyah(surahNumber, index)}
+        />
+        <BookmarkDialog
+          open={openDialog === "bookmarks"}
+          onClose={() => setOpenDialog(null)}
+          bookmarks={bookmarks}
+          currentSurahNumber={surahNumber}
+          currentAyahIndex={safeAyahIndex}
+          onSelect={goToAyah}
+          onRemove={(targetSurah, targetAyahIndex) => setBookmarks((current) =>
+            removeBookmark(current, targetSurah, targetAyahIndex))}
+        />
+        <SleepTimerDialog
+          open={openDialog === "sleep"}
+          onClose={() => setOpenDialog(null)}
+          isActive={sleepTimer.isActive}
+          label={sleepTimer.label}
+          onStartMinutes={sleepTimer.startMinutes}
+          onStartAtEnd={sleepTimer.startAtEnd}
+          onCancel={sleepTimer.cancel}
+        />
+        <OfflineManagerDialog
+          open={openDialog === "offline"}
+          onClose={() => setOpenDialog(null)}
+          audioEdition={audioEdition}
+          revision={cacheRevision}
+          onDeleted={handleCacheDeleted}
         />
       </article>
     </section>

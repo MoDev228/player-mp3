@@ -153,9 +153,11 @@ export async function getSurah(surahNumber, settings) {
     throw new Error("Le numéro de sourate doit être compris entre 1 et 114.");
   }
 
-  const { audioEdition, textEdition } = normalizeSettings(settings);
+  const { audioEdition, textEdition, bilingual } = normalizeSettings(settings);
   const textConfig = getTextEdition(textEdition);
   const metadata = getSurahMetadata(surahNumber);
+  let ayahs;
+  let arabicTexts = null;
 
   if (textConfig.textSource === "alquran") {
     const result = await getJson(
@@ -163,27 +165,42 @@ export async function getSurah(surahNumber, settings) {
       isAlQuranSuraResponse,
     );
 
-    return {
-      ...metadata,
-      ayahs: result.data.ayahs.map((ayah) =>
-        toPlayerAyahFromAlQuran(ayah, surahNumber, audioEdition),
-      ),
-    };
+    ayahs = result.data.ayahs.map((ayah) =>
+      toPlayerAyahFromAlQuran(ayah, surahNumber, audioEdition),
+    );
+  } else {
+    const textField = textConfig.language === "ar" ? "arabic_text" : "translation";
+
+    const result = await getJson(
+      `${API_BASE_URL}/translation/sura/${textConfig.translationKey}/${surahNumber}`,
+      (response) => isSuraResponse(response, textField),
+    );
+
+    ayahs = result.result.map((ayah) =>
+      toPlayerAyah(ayah, surahNumber, audioEdition, textField),
+    );
+
+    if (bilingual && textConfig.language !== "ar" && textConfig.translationKey === "french_rashid") {
+      arabicTexts = result.result.map((ayah) => ayah.arabic_text);
+    }
   }
 
-  const textField = textConfig.language === "ar" ? "arabic_text" : "translation";
+  if (bilingual && textConfig.language !== "ar" && !arabicTexts) {
+    const arabicResult = await getJson(
+      `${API_BASE_URL}/translation/sura/french_rashid/${surahNumber}`,
+      (response) => isSuraResponse(response, "arabic_text"),
+    );
+    arabicTexts = arabicResult.result.map((ayah) => ayah.arabic_text);
+  }
 
-  const result = await getJson(
-    `${API_BASE_URL}/translation/sura/${textConfig.translationKey}/${surahNumber}`,
-    (response) => isSuraResponse(response, textField),
-  );
+  if (arabicTexts?.length === ayahs.length) {
+    ayahs = ayahs.map((ayah, index) => ({
+      ...ayah,
+      arabicText: arabicTexts[index],
+    }));
+  }
 
-  return {
-    ...metadata,
-    ayahs: result.result.map((ayah) =>
-      toPlayerAyah(ayah, surahNumber, audioEdition, textField),
-    ),
-  };
+  return { ...metadata, ayahs };
 }
 
 /**

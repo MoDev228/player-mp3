@@ -83,6 +83,7 @@ export function useAudioPlayer(
   isShuffle,
   resumePosition = 0,
   audioEdition = DEFAULT_SETTINGS.audioEdition,
+  { stopAtEnd = false, onStopAtEnd = null } = {},
 ) {
   const audioRef = useRef(null);
   const hasStartedRef = useRef(false);
@@ -171,6 +172,12 @@ export function useAudioPlayer(
   }, [isMuted, volume]);
 
   const handleEnded = useCallback(() => {
+    if (stopAtEnd) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      onStopAtEnd?.();
+      return;
+    }
     if (repeatMode === "one") {
       const audio = audioRef.current;
       if (audio) { audio.currentTime = 0; audio.play().catch(() => {}); }
@@ -178,7 +185,7 @@ export function useAudioPlayer(
     }
     if (isShuffle || ayahIndex < ayahCount - 1 || repeatMode === "all" || surahNumber < 114) moveAyah(1);
     else setIsPlaying(false);
-  }, [repeatMode, isShuffle, ayahIndex, ayahCount, surahNumber, moveAyah]);
+  }, [repeatMode, isShuffle, ayahIndex, ayahCount, surahNumber, moveAyah, stopAtEnd, onStopAtEnd]);
 
   const handleLoadedMetadata = () => {
     const audio = audioRef.current;
@@ -193,6 +200,10 @@ export function useAudioPlayer(
       resumePositionRef.current = 0;
     }
   };
+
+  const pause = useCallback(() => {
+    audioRef.current?.pause();
+  }, []);
 
   const audioProps = {
     ref: audioRef,
@@ -229,6 +240,7 @@ export function useAudioPlayer(
     isMuted,
     setIsMuted,
     handlePlayPause,
+    pause,
     retryPlayback,
     handleSeek,
   };

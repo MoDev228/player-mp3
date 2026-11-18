@@ -435,6 +435,13 @@
   }
 }
 
+/* Une classe utilitaire `flex` ne doit pas rendre un dialogue fermé visible
+   ni laisser son contenu intercepter les clics (les couches utilitaires de
+   Tailwind sont prioritaires sur `@layer base`). */
+dialog:not([open]) {
+  display: none;
+}
+
 /* Older browsers ignore `font-size-adjust`; nudge the Naskh text scale. */
 @supports not (font-size-adjust: from-font) {
   [lang="ar"] {

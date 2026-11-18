@@ -168,6 +168,7 @@ export const TEXT_EDITIONS = [
 export const DEFAULT_SETTINGS = {
   audioEdition: "french_rashid",
   textEdition: "arabic-uthmani",
+  bilingual: false,
 };
 
 export function isValidAudioEdition(id) {
@@ -200,6 +201,7 @@ export function normalizeSettings(value) {
     textEdition: isValidTextEdition(source.textEdition)
       ? source.textEdition
       : DEFAULT_SETTINGS.textEdition,
+    bilingual: source.bilingual === true,
   };
 }
 

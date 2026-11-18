@@ -7,7 +7,7 @@ const LOAD_ERROR_MESSAGE = "Impossible de charger cette sourate. Vérifie ta con
 
 export function useQuranLibrary(surahNumber, ayahIndex = 0, settings = DEFAULT_SETTINGS) {
   const isOnline = useOnlineStatus();
-  const { audioEdition, textEdition } = settings ?? DEFAULT_SETTINGS;
+  const { audioEdition, textEdition, bilingual } = settings ?? DEFAULT_SETTINGS;
   const [surahs, setSurahs] = useState([]);
   const [surahData, setSurahData] = useState({ key: null, surahNumber: null, audioEdition: null, ayahs: [] });
   const [loadError, setLoadError] = useState({ key: null, message: "" });
@@ -16,7 +16,7 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0, settings = DEFAULT_S
   const [surahsError, setSurahsError] = useState("");
   const [surahsRequest, setSurahsRequest] = useState(0);
 
-  const currentKey = `${surahNumber}|${audioEdition}|${textEdition}`;
+  const currentKey = `${surahNumber}|${audioEdition}|${textEdition}|${Boolean(bilingual)}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -35,7 +35,7 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0, settings = DEFAULT_S
 
   useEffect(() => {
     let cancelled = false;
-    getSurah(surahNumber, { audioEdition, textEdition })
+    getSurah(surahNumber, { audioEdition, textEdition, bilingual })
       .then((data) => {
         if (cancelled) return;
         setSurahData({ key: currentKey, surahNumber, audioEdition, ayahs: data.ayahs });
@@ -45,7 +45,7 @@ export function useQuranLibrary(surahNumber, ayahIndex = 0, settings = DEFAULT_S
         if (!cancelled) setLoadError({ key: currentKey, message: LOAD_ERROR_MESSAGE });
       });
     return () => { cancelled = true; };
-  }, [audioEdition, currentKey, isOnline, surahNumber, surahRequest, textEdition]);
+  }, [audioEdition, bilingual, currentKey, isOnline, surahNumber, surahRequest, textEdition]);
 
   const retrySurah = useCallback(() => {
     setLoadError({ key: null, message: "" });
