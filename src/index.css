@@ -228,6 +228,12 @@
     font-size-adjust: from-font;
   }
 
+  /* Texte du verset en Times New Roman ; Hafs reste réservé à l’arabe. */
+  .ayah-text {
+    font-family: "Times New Roman", Times, serif;
+    font-size-adjust: from-font;
+  }
+
   dialog:modal {
     overscroll-behavior: contain;
   }
@@ -433,5 +439,10 @@
 @supports not (font-size-adjust: from-font) {
   [lang="ar"] {
     font-size: 1.05em;
+  }
+
+  /* Times has nearly the same metrics as Times New Roman. */
+  .ayah-text {
+    font-family: Times, serif;
   }
 }

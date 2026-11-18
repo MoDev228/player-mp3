@@ -18,7 +18,7 @@ function AyahDisplay({ isLoading, error, ayah, ayahCount, onRetry, textEdition }
             dir={textEdition?.dir ?? "rtl"}
             className={isArabic
               ? "text-xl leading-[2.2] sm:text-2xl lg:text-3xl"
-              : "text-lg leading-relaxed sm:text-xl lg:text-2xl"}
+              : "ayah-text text-lg leading-relaxed sm:text-xl lg:text-2xl"}
           >
             {(ayah.text ?? "").replace(/^\uFEFF/, "")}
           </p>
