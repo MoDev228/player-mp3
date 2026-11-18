@@ -76,6 +76,12 @@ function InstallPrompt() {
 
   if (!canInstall && !showHint) return null;
 
+  const installHint = canInstall
+    ? "Cliquez sur Installer pour ouvrir Quran MP3 en plein écran et l’écouter hors connexion."
+    : isIos()
+      ? "Sur iPhone ou iPad, touchez le bouton Partager, puis « Sur l’écran d’accueil »."
+      : "Ouvrez le menu du navigateur, puis choisissez « Installer l’application » ou « Ajouter à l’écran d’accueil ».";
+
   function dismiss() {
     setDismissed(true);
     try {
@@ -135,9 +141,7 @@ function InstallPrompt() {
           Installer l’application
         </h2>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-          {canInstall
-            ? "Plein écran, accès direct et écoute hors connexion."
-            : "Depuis le menu du navigateur, ajoutez Quran MP3 à votre écran d’accueil."}
+          {installHint}
         </p>
         {status && (
           <p role="status" className="mt-1 text-xs font-medium text-primary">
