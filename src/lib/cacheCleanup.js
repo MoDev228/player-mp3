@@ -3,6 +3,10 @@ const LEGACY_CACHE_NAMES = [
   "quran-audio-fr-v2",
   "quran-api-v1",
   "quran-surah-data",
+  // Caches de l’ancien fournisseur AlQuran Cloud.
+  "quran-api-v2",
+  "quran-surah-data-v2",
+  "quran-audio-ar.alafasy-v1",
 ];
 
 export async function removeLegacyCaches() {

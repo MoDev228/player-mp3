@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Police uthmanienne imposée par le texte arabe fourni par QuranEnc. */
+@font-face {
+  font-family: "Hafs Uthmani";
+  src: url("./assets/fonts/Hafs_20.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -214,7 +223,7 @@
   }
 
   [lang="ar"] {
-    font-family: "Amiri", "Noto Naskh Arabic", "Traditional Arabic", serif;
+    font-family: "Hafs Uthmani", "Noto Naskh Arabic", "Traditional Arabic", serif;
     font-weight: 400;
     font-size-adjust: from-font;
   }

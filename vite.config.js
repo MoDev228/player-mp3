@@ -14,32 +14,48 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const editionPattern = [...AUDIO_EDITIONS, ...TEXT_EDITIONS]
-  .map((edition) => escapeRegExp(edition.id))
+const translationKeyPattern = [
+  ...new Set(
+    [...AUDIO_EDITIONS, ...TEXT_EDITIONS]
+      .filter((edition) => edition.textSource !== "alquran")
+      .map((edition) => edition.translationKey)
+      .filter(Boolean),
+  ),
+]
+  .map(escapeRegExp)
   .join("|");
 
 const surahDataPattern = new RegExp(
-  `^https://api\\.alquran\\.cloud/v1/surah(?:\\/\\d+\\/(?:${editionPattern}))?$`,
+  `^https://quranenc\\.com/api/v1/(?:translation/sura/(?:${translationKeyPattern})/\\d+|translations/updates\\?key=(?:${translationKeyPattern}))$`,
 );
 
-const audioRoutes = AUDIO_EDITIONS.map((edition) => ({
-  urlPattern: new RegExp(
-    `^https://cdn\\.islamic\\.network/quran/audio/\\d+/${escapeRegExp(edition.id)}/\\d+\\.mp3$`,
-  ),
-  handler: "CacheFirst",
-  options: {
-    cacheName: getAudioCacheName(edition.id),
-    // Media elements issue opaque `Range` requests. `statuses: []` blocks
-    // Workbox from caching any fetched response, while cache hits are still
-    // served: the app stores complete files itself, so no partial response can
-    // poison offline playback.
-    cacheableResponse: { statuses: [] },
-    expiration: {
-      maxEntries: 1600,
-      maxAgeSeconds: 60 * 60 * 24 * 180,
+const audioRoutes = AUDIO_EDITIONS.map((edition) => {
+  const urlPattern =
+    edition.audioSource === "alquran"
+      ? new RegExp(
+          `^https://cdn\\.islamic\\.network/quran/audio/${edition.bitrate}/${escapeRegExp(edition.id)}/\\d+\\.mp3$`,
+        )
+      : new RegExp(
+          `^https://d\\.quranenc\\.com/data/audio/${escapeRegExp(edition.translationKey)}/\\d{3}\\d{3}\\.mp3$`,
+        );
+
+  return {
+    urlPattern,
+    handler: "CacheFirst",
+    options: {
+      cacheName: getAudioCacheName(edition.id),
+      // Media elements issue opaque `Range` requests. `statuses: []` blocks
+      // Workbox from caching any fetched response, while cache hits are still
+      // served: the app stores complete files itself, so no partial response can
+      // poison offline playback.
+      cacheableResponse: { statuses: [] },
+      expiration: {
+        maxEntries: 1600,
+        maxAgeSeconds: 60 * 60 * 24 * 180,
+      },
     },
-  },
-}));
+  };
+});
 
 export default defineConfig({
   plugins: [
@@ -111,7 +127,7 @@ export default defineConfig({
             urlPattern: surahDataPattern,
             handler: "NetworkFirst",
             options: {
-              cacheName: "quran-surah-data-v2",
+              cacheName: "quran-surah-data-v3",
               networkTimeoutSeconds: 3,
               cacheableResponse: { statuses: [0, 200] },
               expiration: {

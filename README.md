@@ -53,4 +53,10 @@ La commande `pnpm lint` lance Oxlint.
 
 ## Sources des données
 
-Les données des sourates et le texte arabe sont récupérés depuis [AlQuran Cloud](https://alquran.cloud/). Les récitations audio en français sont fournies par leur édition `fr.leclerc` et diffusées depuis le CDN Islamic Network. Une connexion Internet est nécessaire pour récupérer les données et audios qui ne sont pas encore en cache.
+Les textes et les noms de sourates proviennent de [QuranEnc.com](https://quranenc.com/). Les récitations arabes et la voix française de Youssouf Leclerc sont diffusées par le CDN Islamic Network (AlQuran Cloud).
+
+- Récitations audio (CDN Islamic Network) : arabe — Saʿūd ash-Shuraym, Abū Bakr ash-Shāṭirī, Maḥmūd Khalīl al-Ḥuṣary (dont la version *mujawwad*), ʿAbd ar-Raḥmān as-Sudays, Māher al-Muʿayqlī, ʿAlī al-Ḥudhayfī, ʿAbdullāh Baṣfar, Ḥānī ar-Rifāʿī et Ayman Suwaid ; français — Youssouf Leclerc (`fr.leclerc`). La traduction française lue de Rachid Maach (`french_rashid`) provient de QuranEnc.
+- Textes affichés : texte arabe othmanien, traduction française de Rachid Maach ou du Centre International Nûr (`french_montada`, QuranEnc) ; traduction de Mohammed Hamidullah (`fr.hamidullah`, AlQuran Cloud), qui correspond à la récitation française de Youssouf Leclerc.
+- Les métadonnées des sourates non fournies par QuranEnc sont embarquées dans l’application.
+
+Les noms et versions des traductions sont indiqués dans les réglages, conformément aux conditions d’attribution de QuranEnc. Une connexion Internet est nécessaire pour récupérer les données et audios qui ne sont pas encore en cache.

@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { getTranslationInfo } from "@/services/quranApi";
 import {
   AUDIO_EDITIONS,
   DEFAULT_SETTINGS,
   TEXT_EDITIONS,
+  getAudioEdition,
+  getTextEdition,
   normalizeSettings,
 } from "@/lib/quranEditions";
 
@@ -54,6 +57,48 @@ function EditionRadioGroup({ legend, name, editions, value, onChange }) {
 
 function SettingsPage({ theme, onToggleTheme, settings, onSave }) {
   const [draft, setDraft] = useState(() => normalizeSettings(settings));
+  const [versions, setVersions] = useState({ audio: null, text: null });
+
+  const audioEdition = getAudioEdition(draft.audioEdition);
+  const textEdition = getTextEdition(draft.textEdition);
+  const audioCredit = `${audioEdition.label} — ${audioEdition.credit}`;
+  const textCredit =
+    textEdition.textSource === "alquran"
+      ? textEdition.credit
+      : textEdition.credit === "QuranEnc.com"
+        ? "QuranEnc.com"
+        : `${textEdition.credit} — QuranEnc.com`;
+
+  useEffect(() => {
+    let active = true;
+
+    const audioKey = audioEdition.translationKey;
+    Promise.allSettled([
+      audioKey ? getTranslationInfo(audioKey) : Promise.resolve(null),
+      getTranslationInfo(textEdition.translationKey, textEdition.textSource),
+    ]).then(([audioInfo, textInfo]) => {
+      if (!active) return;
+
+      setVersions({
+        audio:
+          audioInfo.status === "fulfilled" && audioInfo.value
+            ? audioInfo.value.version
+            : null,
+        text:
+          textInfo.status === "fulfilled" && textInfo.value
+            ? textInfo.value.version
+            : null,
+      });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    audioEdition.translationKey,
+    textEdition.textSource,
+    textEdition.translationKey,
+  ]);
 
   function update(field, value) {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -132,6 +177,12 @@ function SettingsPage({ theme, onToggleTheme, settings, onSave }) {
             </button>
           </div>
         </form>
+
+        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
+          Audio : {audioCredit}{versions.audio ? ` · v${versions.audio}` : ""}
+          <br />
+          Texte : {textCredit}{versions.text ? ` · v${versions.text}` : ""}
+        </p>
       </article>
     </main>
   );
